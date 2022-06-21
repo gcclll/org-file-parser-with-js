@@ -1,5 +1,6 @@
 import {
   AttributeNode,
+  HeaderNode,
   NodeTypes,
   Node,
   TextNode,
@@ -29,9 +30,6 @@ export interface ParserContext {
   column: number;
 }
 
-// const lineEndRE = /[\r\n]$/
-// const spacesRE = /^[\t\r\n\f ]+/;
-
 function createParserContext(
   content: string,
   rawOptions: ParserOptions
@@ -53,7 +51,7 @@ export function baseParse(content: string, options: ParserOptions = {}) {
 
 function parseChildren(
   context: ParserContext,
-  ancestors: Node[]
+  ancestors: HeaderNode[]
 ): TemplateChildNode {
   const parent = last(ancestors);
   const nodes: TemplateChildNode[] = [];
@@ -72,6 +70,9 @@ function parseChildren(
         // #+ ATTRIBUTE
         node = parseAttribute(context);
       }
+    } else if (/^\*+/.test(s)) {
+      // *** 标题
+      node = parseHeader(context, ancestors);
     }
 
     if (!node) {
@@ -96,7 +97,7 @@ function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
     const prev = last(nodes);
     // 去掉只有空格或换行符的节点
     if (node.content.trim() === '') {
-      return
+      return;
     }
     if (prev && prev.type === NodeTypes.TEXT) {
       prev.content += node.content;
@@ -106,10 +107,44 @@ function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
   nodes.push(node);
 }
 
+function parseHeader(context: ParserContext, ancestors: HeaderNode[]): HeaderNode {
+  const start = getCursor(context);
+  const match = /^(\*+)\s+([^\n]+)/i.exec(context.source)!;
+  const level = match[1].length
+  const title = match[2];
+
+  advanceBy(context, match[0].length);
+  advanceSpaces(context);
+
+  const header: HeaderNode = {
+    type: NodeTypes.HEADER,
+    children: [] as Node[],
+    title,
+    level,
+    loc: getSelection(context, start),
+  };
+  
+  // let parent
+  // while ((parent = last(ancestors)) && header.level >= parent.level) {
+  //   console.log(header, parent, 30000)
+  //   ancestors.pop()
+  // }
+  
+  ancestors.push(header);
+  const children = parseChildren(context, ancestors);
+  ancestors.pop();
+
+  header.children = children;
+
+  header.loc = getSelection(context, header.loc.start);
+
+  return header;
+}
+
 /**
  * 解析 #+title: name 类型
  * @param {ParserContext} context
- * @returns {AttributeNode} 
+ * @returns {AttributeNode}
  */
 function parseAttribute(context: ParserContext): AttributeNode {
   const start = getCursor(context);
@@ -184,18 +219,18 @@ function last<T>(xs: T[]): T | undefined {
 
 function advanceBy(context: ParserContext, numberOfCharacters: number): void {
   const { source } = context;
-  console.log(context, 'before')
-  advancePositionWithMutation(context, source, numberOfCharacters)
-  console.log(context, 'after')
+  console.log(context, 'before');
+  advancePositionWithMutation(context, source, numberOfCharacters);
+  console.log(context, 'after');
   context.source = source.slice(numberOfCharacters);
 }
 
-// function advanceSpaces(context: ParserContext): void {
-//   const match = spacesRE.exec(context.source);
-//   if (match) {
-//     advanceBy(context, match[0].length);
-//   }
-// }
+function advanceSpaces(context: ParserContext): void {
+  const match = /^[\t\r\n\f ]+/.exec(context.source);
+  if (match) {
+    advanceBy(context, match[0].length);
+  }
+}
 
 // function getNewPosition(
 //   context: ParserContext,

@@ -20,71 +20,75 @@ export const enum NodeTypes {
 }
 
 export interface Node {
-  type: NodeTypes
-  loc: SourceLocation    
+  type: NodeTypes;
+  loc: SourceLocation;
 }
 
-export type TemplateChildNode = any
+export type TemplateChildNode = any;
 
 export interface RootNode extends Node {
-  type: NodeTypes.ROOT
-  children: TemplateChildNode[]
-  todos: Node[]
+  type: NodeTypes.ROOT;
+  children: TemplateChildNode[];
+  todos: Node[];
 }
 
 export interface TextNode extends Node {
-  type: NodeTypes.TEXT
-  content: string                  
+  type: NodeTypes.TEXT;
+  content: string;
 }
 
 export interface CommentNode extends Node {
-  type: NodeTypes.COMMENT
-  content: string                    
+  type: NodeTypes.COMMENT;
+  content: string;
 }
 
 export interface AttributeNode extends Node {
-  type: NodeTypes.ATTRIBUTE
-  name: string                  
-  value: TextNode | undefined
+  type: NodeTypes.ATTRIBUTE;
+  name: string;
+  value: TextNode | undefined;
 }
 
 export interface PropertyNode extends Node {
-  type: NodeTypes.PROPERTY
-  name: string                    
-  value: TextNode | undefined
+  type: NodeTypes.PROPERTY;
+  name: string;
+  value: TextNode | undefined;
 }
 
 export interface TagNode extends Node {
-  type: NodeTypes.TAG
-  name: string                  
-  value: TextNode | undefined
+  type: NodeTypes.TAG;
+  name: string;
+  value: TextNode | undefined;
+}
+
+export interface HeaderNode extends Node {
+  type: NodeTypes.HEADER;
+  title: string;
+  children: Node[];
+  level: number;
 }
 
 export interface TimestampNode extends Node {
-  type: NodeTypes.TIMESTAMP
-  name: string                    
-  value: TextNode | undefined
+  type: NodeTypes.TIMESTAMP;
+  name: string;
+  value: TextNode | undefined;
 }
 
-export function createRoot(
-  children: TemplateChildNode[]
-) {
+export function createRoot(children: TemplateChildNode[]) {
   return {
     type: NodeTypes.ROOT,
     children,
-    todos: []
-  }
+    todos: [],
+  };
 }
 
 export interface SourceLocation {
-  start: Position
-  end: Position     
-  source: string
+  start: Position;
+  end: Position;
+  source: string;
 }
 
 export interface Position {
-  offset: number
-  line: number      
-  column: number
+  offset: number;
+  line: number;
+  column: number;
 }
-
