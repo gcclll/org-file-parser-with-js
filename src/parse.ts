@@ -1,4 +1,5 @@
 import {
+  AttributeNode,
   NodeTypes,
   Node,
   TextNode,
@@ -7,6 +8,13 @@ import {
   SourceLocation,
   createRoot,
 } from './ast';
+
+type AttributeValue =
+  | {
+      content: string;
+      loc: SourceLocation;
+    }
+  | undefined;
 
 // const extend = Object.assign;
 const isArray = Array.isArray;
@@ -43,9 +51,6 @@ export function baseParse(content: string, options: ParserOptions = {}) {
   return createRoot(parseChildren(context, []));
 }
 
-// for test
-const maxium = 100;
-
 function parseChildren(
   context: ParserContext,
   ancestors: Node[]
@@ -55,14 +60,18 @@ function parseChildren(
 
   log(`[parseChildren] --------------------------------------- START`);
   log({ parent, ancestors });
-  
-  let limit = 0;
+
   while (context.source) {
-    // const s = context.source;
+    const s = context.source;
     let node: TemplateChildNode | TemplateChildNode[] | undefined = undefined;
-    if (++limit > maxium) {
-      log(`[parseChildren] out of boundary.`);
-      return;
+
+    if (s[0] === '#') {
+      if (s.length === 1) {
+        // error
+      } else if (s[1] === '+') {
+        // #+ ATTRIBUTE
+        node = parseAttribute(context);
+      }
     }
 
     if (!node) {
@@ -85,12 +94,55 @@ function parseChildren(
 function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
   if (node.type === NodeTypes.TEXT) {
     const prev = last(nodes);
+    // 去掉只有空格或换行符的节点
+    if (node.content.trim() === '') {
+      return
+    }
     if (prev && prev.type === NodeTypes.TEXT) {
       prev.content += node.content;
       return;
     }
   }
   nodes.push(node);
+}
+
+/**
+ * 解析 #+title: name 类型
+ * @param {ParserContext} context
+ * @returns {AttributeNode} 
+ */
+function parseAttribute(context: ParserContext): AttributeNode {
+  const start = getCursor(context);
+
+  // #+author
+  const match = /([\w_]+):/.exec(context.source)!;
+  const name = match[1];
+
+  advanceBy(context, name.length + 3); // #+ and :
+
+  let value: AttributeValue = parseAttributeValue(context);
+  const loc = getSelection(context, start);
+
+  return {
+    type: NodeTypes.ATTRIBUTE,
+    name,
+    value: value && {
+      type: NodeTypes.TEXT,
+      content: value.content,
+      loc: value.loc,
+    },
+    loc,
+  };
+}
+
+function parseAttributeValue(context: ParserContext): AttributeValue {
+  const start = getCursor(context);
+  let content: string;
+
+  const endIndex = context.source.indexOf('\n');
+  content = parseTextData(context, endIndex);
+
+  return { content, loc: getSelection(context, start) };
 }
 
 function parseText(context: ParserContext): TextNode {
@@ -107,7 +159,7 @@ function parseText(context: ParserContext): TextNode {
 
   const start = getCursor(context);
   const content = parseTextData(context, endIndex);
-  console.log({ endIndex, content })  
+  console.log({ endIndex, content });
 
   return {
     type: NodeTypes.TEXT,
@@ -132,6 +184,9 @@ function last<T>(xs: T[]): T | undefined {
 
 function advanceBy(context: ParserContext, numberOfCharacters: number): void {
   const { source } = context;
+  console.log(context, 'before')
+  advancePositionWithMutation(context, source, numberOfCharacters)
+  console.log(context, 'after')
   context.source = source.slice(numberOfCharacters);
 }
 
