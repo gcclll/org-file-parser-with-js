@@ -112,8 +112,7 @@ function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
 }
 
 function parseBlock(context: ParserContext) {
-  
-  
+  console.log(context)
 }
 
 function parseHeader(
