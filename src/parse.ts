@@ -44,6 +44,8 @@ function createParserContext(
   };
 }
 
+const headerRE = /^(\*+)\s+([^\n]+)/;
+
 export function baseParse(content: string, options: ParserOptions = {}) {
   const context = createParserContext(content, options);
   return createRoot(parseChildren(context, []));
@@ -56,10 +58,10 @@ function parseChildren(
   const parent = last(ancestors);
   const nodes: TemplateChildNode[] = [];
 
-  log(`[parseChildren] --------------------------------------- START`);
-  log({ parent, ancestors });
+  parent;
+  // log({ parent, ancestors });
 
-  while (context.source) {
+  while (!isEnd(context, ancestors)) {
     const s = context.source;
     let node: TemplateChildNode | TemplateChildNode[] | undefined = undefined;
 
@@ -70,8 +72,7 @@ function parseChildren(
         // #+ ATTRIBUTE
         node = parseAttribute(context);
       }
-    } else if (/^\*+/.test(s)) {
-      // *** 标题
+    } else if (/^\*+\s+/.test(s)) {
       node = parseHeader(context, ancestors);
     }
 
@@ -79,7 +80,7 @@ function parseChildren(
       node = parseText(context);
     }
 
-    if (Array.isArray(node)) {
+    if (isArray(node)) {
       for (let i = 0; i < node.length; i++) {
         pushNode(nodes, node[i]);
       }
@@ -88,7 +89,6 @@ function parseChildren(
     }
   }
 
-  log(`[parseChildren] --------------------------------------- END`);
   return nodes.filter(Boolean);
 }
 
@@ -107,10 +107,13 @@ function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
   nodes.push(node);
 }
 
-function parseHeader(context: ParserContext, ancestors: HeaderNode[]): HeaderNode {
+function parseHeader(
+  context: ParserContext,
+  ancestors: HeaderNode[]
+): HeaderNode | undefined {
   const start = getCursor(context);
-  const match = /^(\*+)\s+([^\n]+)/i.exec(context.source)!;
-  const level = match[1].length
+  const match = headerRE.exec(context.source)!;
+  const level = match[1].length;
   const title = match[2];
 
   advanceBy(context, match[0].length);
@@ -119,17 +122,11 @@ function parseHeader(context: ParserContext, ancestors: HeaderNode[]): HeaderNod
   const header: HeaderNode = {
     type: NodeTypes.HEADER,
     children: [] as Node[],
-    title,
+    content: title,
     level,
     loc: getSelection(context, start),
   };
-  
-  // let parent
-  // while ((parent = last(ancestors)) && header.level >= parent.level) {
-  //   console.log(header, parent, 30000)
-  //   ancestors.pop()
-  // }
-  
+
   ancestors.push(header);
   const children = parseChildren(context, ancestors);
   ancestors.pop();
@@ -194,7 +191,6 @@ function parseText(context: ParserContext): TextNode {
 
   const start = getCursor(context);
   const content = parseTextData(context, endIndex);
-  console.log({ endIndex, content });
 
   return {
     type: NodeTypes.TEXT,
@@ -219,9 +215,7 @@ function last<T>(xs: T[]): T | undefined {
 
 function advanceBy(context: ParserContext, numberOfCharacters: number): void {
   const { source } = context;
-  console.log(context, 'before');
   advancePositionWithMutation(context, source, numberOfCharacters);
-  console.log(context, 'after');
   context.source = source.slice(numberOfCharacters);
 }
 
@@ -300,10 +294,28 @@ export function advancePositionWithMutation(
   return pos;
 }
 
-function log(msg: any) {
-  if (isArray(msg)) {
-    msg.forEach(console.log);
-  } else {
-    console.log(msg);
+export function findParentHeader(
+  ancestors: HeaderNode[],
+  level: number
+): HeaderNode | undefined {
+  for (let i = ancestors.length - 1; i >= 0; i--) {
+    const parent = ancestors[i]!;
+    if (parent && parent.level < level) {
+      return parent;
+    }
   }
+  return;
+}
+
+function isEnd(context: ParserContext, ancestors: HeaderNode[]): boolean {
+  const parent = last(ancestors);
+  if (
+    headerRE.test(context.source) &&
+    parent &&
+    parent.type === NodeTypes.HEADER
+  ) {
+    return true;
+  }
+
+  return !context.source;
 }

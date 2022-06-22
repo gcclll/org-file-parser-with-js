@@ -62,7 +62,7 @@ export interface TagNode extends Node {
 
 export interface HeaderNode extends Node {
   type: NodeTypes.HEADER;
-  title: string;
+  content: string;
   children: Node[];
   level: number;
 }
