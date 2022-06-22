@@ -70,7 +70,11 @@ function parseChildren(
         // error
       } else if (s[1] === '+') {
         // #+ ATTRIBUTE
-        node = parseAttribute(context);
+        if (/^#+begin_/.test(s)) { // 代码块
+          node = parseBlock(context)
+        } else if (/^#+\w+:/i.test(s)) { // 页面属性
+          node = parseAttribute(context);
+        }
       }
     } else if (/^\*+\s+/.test(s)) {
       node = parseHeader(context, ancestors);
@@ -105,6 +109,11 @@ function pushNode(nodes: TemplateChildNode[], node: TemplateChildNode): void {
     }
   }
   nodes.push(node);
+}
+
+function parseBlock(context: ParserContext) {
+  
+  
 }
 
 function parseHeader(

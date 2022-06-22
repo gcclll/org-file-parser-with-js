@@ -11,12 +11,6 @@ export const enum NodeTypes {
   LINK_OUT, // [[link][decription]], 外部链接
   LINK_INNER, // <<link>> 内部链接，跳转到文档内部
   LINK_RADIO, // <<<target>>>
-
-  // blocks
-  BLOCK_INLINE, // 行代码块 ~xx~, =xx=
-  BLOCK_SRC, // 代码块
-  BLOCK_EXAMPLE,
-  BLOCK_EXPORT, // 导出
 }
 
 export interface Node {
@@ -30,6 +24,15 @@ export interface RootNode extends Node {
   type: NodeTypes.ROOT;
   children: TemplateChildNode[];
   todos: Node[];
+}
+
+type BlockName = 'src' | 'example' | 'export'
+export interface BlockNode extends Node {
+  type: NodeTypes.BLOCK
+  name: BlockName
+  content: string
+  props: Record<string, string>
+  
 }
 
 export interface TextNode extends Node {
