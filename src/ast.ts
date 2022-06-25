@@ -4,6 +4,7 @@ export const enum NodeTypes {
   HEADER, // 标题
   COMMENT, // 注释, #
   ATTRIBUTE, // #+xxx 属性
+  LIST, // 列表
   PROPERTY, // :name:
   TAG, // :tag1:tag2:
   TIMESTAMP, // <2022-06-21 14:02:38>
@@ -26,13 +27,18 @@ export interface RootNode extends Node {
   todos: Node[];
 }
 
-type BlockName = 'src' | 'example' | 'export'
+export type BlockName = 'src' | 'example' | 'export'
+export interface BlockProp {
+  name: string
+  value: string    
+}                                             
+
 export interface BlockNode extends Node {
   type: NodeTypes.BLOCK
   name: BlockName
   content: string
-  props: Record<string, string>
-  
+  language: string
+  props: BlockProp[]
 }
 
 export interface TextNode extends Node {
@@ -43,6 +49,22 @@ export interface TextNode extends Node {
 export interface CommentNode extends Node {
   type: NodeTypes.COMMENT;
   content: string;
+}
+
+// 列表状态 
+// - [-] DOSING
+// - [x] DONE
+export enum ListItemStatus {
+  DONE,                         // [x]
+  DOING,                        // [-]
+}
+
+export interface ListNode extends Node {
+  type: NodeTypes.LIST
+  list: Node[]
+  orderly: boolean              // 有序(n.) - true, 无序(-) - false
+  status: ListItemStatus
+  children: TemplateChildNode[]
 }
 
 export interface AttributeNode extends Node {

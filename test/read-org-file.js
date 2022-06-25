@@ -9,6 +9,7 @@ fs.readFile('./demo.org', (err, data) => {
   }
   if (data) {
     const context = data.toString();
+    console.log(context.split(/\\n+/g))
     const ast = baseParse(context);
     const last = ast.children[ast.children.length - 1];
 

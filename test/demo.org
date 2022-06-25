@@ -3,10 +3,14 @@
 #+email: gccll.love@gmail.com
 
 
-I'am test test!!!!#code
+I'am test test!!!!
 
 * header1-1
 header1 content
+
+#+begin_src emacs-lisp :tangle yes
+(message "hello emacs lisp!")
+#+end_src
 
 ** header2-1
 
