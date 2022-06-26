@@ -9,14 +9,14 @@ fs.readFile('./demo.org', (err, data) => {
   }
   if (data) {
     const context = data.toString();
-    const ast = baseParse(context);
+    const nodes = baseParse(context);
 
-    // fs.writeFile(
-    //   process.env.HOME + '/tmp/org.js',
-    //   `window.$json=${JSON.stringify(ast)}`,
-    //   (err) => {
-    //     console.log('write error', err);
-    //   }
-    // );
+    fs.writeFile(
+      process.env.HOME + '/tmp/org.js',
+      `window.$json=${JSON.stringify(nodes)}`,
+      (err) => {
+        console.log('write error', err);
+      }
+    );
   }
 });
