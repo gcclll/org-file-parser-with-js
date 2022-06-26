@@ -24,6 +24,7 @@ export interface Node {
   indent: number
   index: number
   children?: Node[]
+  tags?: string[]
 }
 
 export interface TextNode extends Node {
@@ -131,7 +132,9 @@ export function parseNode(content: string, index: number) {
 }
 
 // 解析标题
-export function parseHeader(content: string, index: number): HeaderNode | null {
+export function parseHeader(source: string, index: number): HeaderNode | null {
+  const { content, tags } = parseTags(source)
+  
   const matched = content.match(headerRE)
   
   if (matched == null) {
@@ -146,6 +149,7 @@ export function parseHeader(content: string, index: number): HeaderNode | null {
     title,
     index,
     indent: 0,
+    tags,
     level: stars.length,
   }
 }
@@ -181,5 +185,30 @@ export function parseText(content: string, index: number): TextNode | null {
     content: content.trim(),
     indent,
     index
+  }
+}
+
+function parseTags(content: string): { 
+  content: string 
+  tags: string[]
+} {
+  const tagRE = /:([\w_-]+):/gi
+  const s = content
+  if (s == '') {
+    return { content, tags: [] }
+  }
+  
+  let tags = []
+  let matched: any
+  while ((matched = tagRE.exec(s))) {
+    const [, tag] = matched || []
+    tags.push(tag)
+    // remove tag from original content
+    content = content.replace(`:${tag}:`, '')
+  }
+  
+  return {
+    tags,
+    content
   }
 }
