@@ -19,7 +19,7 @@ export const enum NodeTypes {
 export interface RootNode {
   metas: Attribute[]; // 页面头部所有属性
   children: any[];
-  footnotes: FootNode[]; // 脚注节点
+  footnotes: FootNode[]; // 脚注节点gs./l
   // TODO more...
 }
 
