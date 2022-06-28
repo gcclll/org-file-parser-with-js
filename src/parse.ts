@@ -3,6 +3,7 @@ export const isArray = Array.isArray;
 export interface ParserOptions {}
 
 export const enum NodeTypes {
+  ROOT, // 根节点
   TEXT, // pure text
   PROPERTY, // #+...
   HEADER, // ** ...
@@ -15,6 +16,13 @@ export const enum NodeTypes {
   INNER_LINK, // <<meta_id>>
 }
 
+export interface RootNode {
+  metas: Attribute[]; // 页面头部所有属性
+  children: any[];
+  footnotes: FootNode[]; // 脚注节点
+  // TODO more...
+}
+
 export interface Node {
   type: NodeTypes;
   content: string;
@@ -22,6 +30,11 @@ export interface Node {
   index: number;
   children?: Node[];
   tags?: string[];
+}
+
+export interface FootNode {
+  name: string;
+  value: string;
 }
 
 export interface TextNode extends Node {
@@ -230,3 +243,4 @@ function parseTags(content: string): {
     content,
   };
 }
+
