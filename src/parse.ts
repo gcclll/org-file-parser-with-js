@@ -192,19 +192,16 @@ function parseTags(content: string): {
   content: string 
   tags: string[]
 } {
-  const tagRE = /:([\w_-]+):/gi
-  const s = content
-  if (s == '') {
-    return { content, tags: [] }
-  }
-  
-  let tags = []
-  let matched: any
-  while ((matched = tagRE.exec(s))) {
-    const [, tag] = matched || []
-    tags.push(tag)
-    // remove tag from original content
-    content = content.replace(`:${tag}:`, '')
+  const tagRE = /:(.*):/gi
+  let matched: string[] | null = null
+  let tags: string[] = []
+  if (content == '') {
+    matched = null
+  } else if ((matched = content.match(tagRE))) {
+    const value = matched[0]
+    // remove matched tags from header
+    content = content.replace(value, '')
+    tags = value.replace(/^:|:$/, '').split(':').filter(Boolean)
   }
   
   return {

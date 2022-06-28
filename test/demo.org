@@ -5,7 +5,7 @@
 
 I'am test test!!!!
 
-* header1-1         :js: :emacs: 
+* header1-1 :test:bbb:ccc:
 header1 content
 
 #+begin_src emacs-lisp :tangle yes
@@ -35,7 +35,7 @@ header2-2 content 2
 header2-3 content 1
 header2-3 content 2
 
-* header1-2
+* header1-2 :test:home:
 
 header1-2 content 1
 header1-2 content 2
