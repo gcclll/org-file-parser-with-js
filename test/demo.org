@@ -5,14 +5,8 @@
 
 I'am test test!!!!
 
-* emphasis node
-
 * header1-1 :test:bbb:ccc:
 header1 content
-
-#+begin_src emacs-lisp :tangle yes
-(message "hello emacs lisp!")
-#+end_src
 
 ** header2-1
 
@@ -24,25 +18,9 @@ Header2-1 content 2
 
 Header2-1 content 3
 
-*** header2-1-1
+* emphasis node
 
-header2-1-1 content 1
-header2-1-1 content 2
-** header2-2
+Functions =inserting= links (~see~ Handling +Links+) properly escape ambiguous characters. You only need to bother about the rules above when inserting directly, or yanking, a URI within square brackets. When in doubt, you may use the function org-link-escape, ~which~ turns a +link+ string /into/ its _escaped_ form.
 
-header2-2 content 1
-header2-2 content 2
-** header2-3
+Once a link in the buffer is complete, with all brackets present, Org changes the display so that ‘DESCRIPTION’ is displayed instead of ‘[[LINK][DESCRIPTION]]’ and ‘LINK’ is displayed instead of ‘[[LINK]]’. Links are highlighted in the org-link face, which, by default, is an underlined face.
 
-header2-3 content 1
-header2-3 content 2
-
-* header1-2 :test:home:
-
-header1-2 content 1
-header1-2 content 2
-
-** header1-2-1
-
-header1-2-1 content 1
-header1-2-1 content 1

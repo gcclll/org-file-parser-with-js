@@ -28,7 +28,7 @@ export interface Node {
   content: string;
   indent: number;
   index: number;
-  children?: Node[];
+  children?: any[];
   tags?: string[];
 }
 
@@ -93,8 +93,8 @@ export interface ListNode extends Node {
   status: DoStatus;
 }
 
-export const inlineTagList = ['=', '+', '_', '/', '~'];
-export type InlineTag = '=' | '+' | '_' | '/' | '~';
+export const inlineTagList = ['=', '+', '_', '/', '~', '*', '$'];
+export type InlineTag = '=' | '+' | '_' | '/' | '~' | '*' | '$';
 
 export interface EmphasisNode extends Node {
   type: NodeTypes.EMPHASIS;
@@ -118,7 +118,7 @@ export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
-export const emphasisRE = /([=~\+_/])(?=[^\s])(.*)[^\s](?:\1)/g;
+export const emphasisRE = /([=~\+_/\$])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 
 export function baseParse(source: string, options: ParserOptions = {}) {
   const list = source.split(/\n+/); //.map(row => row.replace(/^[\s\t\f\r\n]+/g, ''))
@@ -171,7 +171,12 @@ export function parseHeader(source: string, index: number): HeaderNode | null {
   };
 }
 
-// 解析属性
+/**
+ * 解析文中出现的 `#+title: title content`
+ * @param {string} content
+ * @param {number} index
+ * @returns 
+ */
 export function parseProperty(
   content: string,
   index: number
@@ -218,7 +223,46 @@ export function parseText(content: string, index: number): TextNode {
  * @params {TextNode} parent 正文解析出来的节点挂到文本节点上去
  * @return {TextNode}
  */
-export function parseEmphasisText(parent: TextNode) {
+export function parseEmphasisText(parent: TextNode): TextNode {
+  let source = parent.content
+  
+  if (!source) return parent
+  const children = []
+
+  let result, cursor = 0
+  while ((result = emphasisRE.exec(source))) {
+    // eg. content: ~bala bala~, sign = "~", value = "bala bala"
+    const [matchText, sign, matchValue] = result
+
+    const pureText = source.slice(cursor, result.index)
+    
+    // left text node
+    children.push({
+      type: NodeTypes.TEXT,
+      content: pureText
+    })
+    
+    // emphasis node
+    children.push({
+      type: NodeTypes.EMPHASIS,
+      tag: sign,
+      content: matchValue
+    })
+    
+    // 保留上次遍历的游标位置，主要用来切割纯文本
+    cursor = result.index + matchText.length
+  }
+
+  // 最后的文本
+  if (source) {
+    children.push({
+      type: NodeTypes.TEXT,
+      content: source
+    })
+  }
+  
+  parent.children = children
+  
   return parent;
 }
 
@@ -243,4 +287,3 @@ function parseTags(content: string): {
     content,
   };
 }
-
