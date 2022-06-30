@@ -4,7 +4,7 @@
 
 ### Bugs
 
-- block can't be parsed correctly without attribute
+- block can't be parsed correctly without attribute, [#0edc204](https://github.com/gcclll/org-file-parser-with-js/commit/0edc2045b9abe4d70aaa11805c5d236ab9fe9663)
 
 # TODOs
 
