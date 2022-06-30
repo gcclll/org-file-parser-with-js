@@ -24,3 +24,10 @@ Functions =inserting= links (~see~ Handling +Links+) properly escape ambiguous c
 
 Once a link in the buffer is complete, with all brackets present, Org changes the display so that ‘DESCRIPTION’ is displayed instead of ‘[[LINK][DESCRIPTION]]’ and ‘LINK’ is displayed instead of ‘[[LINK]]’. Links are highlighted in the org-link face, which, by default, is an underlined face.
 
+* block node
+
+#+begin_src emacs-lisp -n -r :result both :noweb yes
+(message "test emacs-lisp block 1")
+(message "test emacs-lisp block 2")
+(message "test emacs-lisp block 3")
+#+end_src

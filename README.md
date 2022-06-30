@@ -1,142 +1,48 @@
 # TODOs
 
-- 2 Document Structure
-
-  - [x] [2.1 Headlines](https://orgmode.org/manual/Headlines.html#Headlines)
-  - [ ] [2.6 Plain Lists](https://orgmode.org/manual/Plain-Lists.html#Plain-Lists)
-  - [ ] Unordered Lists(`-, +, *`)
-  - [ ] Ordered Lists(`1. 1) a. a)`)
-  - [ ] [2.7 Drawers](https://orgmode.org/manual/Drawers.html#Drawers)
-  - [ ] [2.8 Blocks](https://orgmode.org/manual/Blocks.html#Blocks)
-
-- 3 [Tables](https://orgmode.org/manual/Tables.html#Tables)
-
-- 4 Hyperlinks
-
-  - [x] ​	[4.1 Link Format](https://orgmode.org/manual/Link-Format.html#Link-Format)
-  - [ ] [4.2 Internal Links](https://orgmode.org/manual/Internal-Links.html#Internal-Links)
-  - [ ] [4.3 Radio Targets](https://orgmode.org/manual/Radio-Targets.html#Radio-Targets)
-  - [ ] [4.4 External Links](https://orgmode.org/manual/External-Links.html#External-Links)
-  - [ ] [4.5 Handling Links](https://orgmode.org/manual/Handling-Links.html#Handling-Links)
-  - [ ] [4.6 Using Links Outside Org](https://orgmode.org/manual/Using-Links-Outside-Org.html#Using-Links-Outside-Org)
-  - [ ] [4.7 Link Abbreviations](https://orgmode.org/manual/Link-Abbreviations.html#Link-Abbreviations)
-  - [ ] [4.8 Search Options in File Links](https://orgmode.org/manual/Search-Options.html#Search-Options)
-  - [ ] [4.9 Custom Searches](https://orgmode.org/manual/Custom-Searches.html#Custom-Searches)
-
-- 5 TODO Items
-
-  - [5.1 Basic TODO Functionality](https://orgmode.org/manual/TODO-Basics.html#TODO-Basics)
-
-  - 5.2 Extended Use of TODO Keywords
-
-    - [ ] [5.2.1 TODO keywords as workflow states](https://orgmode.org/manual/Workflow-states.html#Workflow-states)
-
-    - [ ] [5.2.2 TODO keywords as types](https://orgmode.org/manual/TODO-types.html#TODO-types)
-    - [ ] [5.2.3 Multiple keyword sets in one file](https://orgmode.org/manual/Multiple-sets-in-one-file.html#Multiple-sets-in-one-file)
-    - [ ] [5.2.4 Fast access to TODO states](https://orgmode.org/manual/Fast-access-to-TODO-states.html#Fast-access-to-TODO-states)
-    - [ ] [5.2.5 Setting up keywords for individual files](https://orgmode.org/manual/Per_002dfile-keywords.html#Per_002dfile-keywords)
-    - [ ] [5.2.6 Faces for TODO keywords](https://orgmode.org/manual/Faces-for-TODO-keywords.html#Faces-for-TODO-keywords)
-    - [ ] [5.2.7 TODO dependencies](https://orgmode.org/manual/TODO-dependencies.html#TODO-dependencies)
-
-  - 5.3 Progress Logging
-
-    - [ ] [5.3.1 Closing items](https://orgmode.org/manual/Closing-items.html#Closing-items)
-    - [ ] [5.3.2 Tracking TODO state changes](https://orgmode.org/manual/Tracking-TODO-state-changes.html#Tracking-TODO-state-changes)
-    - [ ] [5.3.3 Tracking your habits](https://orgmode.org/manual/Tracking-your-habits.html#Tracking-your-habits)
-
-  - [ ] [5.4 Priorities](https://orgmode.org/manual/Priorities.html#Priorities)
-
-  - [ ] [5.5 Breaking Down Tasks into Subtasks](https://orgmode.org/manual/Breaking-Down-Tasks.html#Breaking-Down-Tasks)
-
-  - [ ] [5.6 Checkboxes](https://orgmode.org/manual/Checkboxes.html#Checkboxes)
-
-- 6 Tags
-
-  - [ ] [6.1 Tag Inheritance](https://orgmode.org/manual/Tag-Inheritance.html#Tag-Inheritance)
-  - [ ] [6.2 Setting Tags](https://orgmode.org/manual/Setting-Tags.html#Setting-Tags)
-  - [ ] [6.3 Tag Hierarchy](https://orgmode.org/manual/Tag-Hierarchy.html#Tag-Hierarchy)
-  - [ ] [6.4 Tag Searches](https://orgmode.org/manual/Tag-Searches.html#Tag-Searches)
-
-- 7 Properties and Columns
-
-  - [ ] [7.1 Property Syntax](https://orgmode.org/manual/Property-Syntax.html#Property-Syntax)
-  - [ ] [7.2 Special Properties](https://orgmode.org/manual/Special-Properties.html#Special-Properties)
-  - [ ] [7.3 Property Searches](https://orgmode.org/manual/Property-Searches.html#Property-Searches)
-  - [ ] [7.4 Property Inheritance](https://orgmode.org/manual/Property-Inheritance.html#Property-Inheritance)
-  - [ ] 7.5 Column View
-    - 7.5.1 Defining columns
-      - [7.5.1.1 Scope of column definitions](https://orgmode.org/manual/Scope-of-column-definitions.html#Scope-of-column-definitions)
-      - [7.5.1.2 Column attributes](https://orgmode.org/manual/Column-attributes.html#Column-attributes)
-    - [7.5.2 Using column view](https://orgmode.org/manual/Using-column-view.html#Using-column-view)
-    - [7.5.3 Capturing column view](https://orgmode.org/manual/Capturing-column-view.html#Capturing-column-view)
-
-- 8 Dates and Times
-
-  - [ ] [8.1 Timestamps](https://orgmode.org/manual/Timestamps.html#Timestamps)
-  - [ ] 8.2 Creating Timestamps
-    - [8.2.1 The date/time prompt](https://orgmode.org/manual/The-date_002ftime-prompt.html#The-date_002ftime-prompt)
-    - [8.2.2 Custom time format](https://orgmode.org/manual/Custom-time-format.html#Custom-time-format)
-  - [ ] 8.3 Deadlines and Scheduling
-    - [8.3.1 Inserting deadlines or schedules](https://orgmode.org/manual/Inserting-deadline_002fschedule.html#Inserting-deadline_002fschedule)
-    - [8.3.2 Repeated tasks](https://orgmode.org/manual/Repeated-tasks.html#Repeated-tasks)
-  - [ ] 8.4 Clocking Work Time
-    - [8.4.1 Clocking commands](https://orgmode.org/manual/Clocking-commands.html#Clocking-commands)
-    - [8.4.2 The clock table](https://orgmode.org/manual/The-clock-table.html#The-clock-table)
-    - [8.4.3 Resolving idle time and continuous clocking](https://orgmode.org/manual/Resolving-idle-time.html#Resolving-idle-time)
-  - [ ] [8.5 Effort Estimates](https://orgmode.org/manual/Effort-Estimates.html#Effort-Estimates)
-  - [ ] [8.6 Taking Notes with a Relative Timer](https://orgmode.org/manual/Timers.html#Timers)
-
-- 12 Markup for Rich Contents
-
-  - [ ] [12.1 Paragraphs](https://orgmode.org/manual/Paragraphs.html#Paragraphs)
-  - [ ] [12.2 Emphasis and Monospace](https://orgmode.org/manual/Emphasis-and-Monospace.html#Emphasis-and-Monospace)
-  - [ ] [12.3 Subscripts and Superscripts](https://orgmode.org/manual/Subscripts-and-Superscripts.html#Subscripts-and-Superscripts)
-  - [ ] [12.4 Special Symbols](https://orgmode.org/manual/Special-Symbols.html#Special-Symbols)
-  - [ ] 12.5 Embedded LaTeX
-    - [12.5.1 LaTeX fragments](https://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments)
-    - [12.5.2 Previewing LaTeX fragments](https://orgmode.org/manual/Previewing-LaTeX-fragments.html#Previewing-LaTeX-fragments)
-    - [12.5.3 Using CDLaTeX to enter math](https://orgmode.org/manual/CDLaTeX-mode.html#CDLaTeX-mode)
-  - [ ] [12.6 Literal Examples](https://orgmode.org/manual/Literal-Examples.html#Literal-Examples)
-  - [ ] [12.7 Images](https://orgmode.org/manual/Images.html#Images)
-  - [ ] [12.8 Captions](https://orgmode.org/manual/Captions.html#Captions)
-  - [ ] [12.9 Horizontal Rules](https://orgmode.org/manual/Horizontal-Rules.html#Horizontal-Rules)
-  - [ ] [12.10 Creating Footnotes](https://orgmode.org/manual/Creating-Footnotes.html#Creating-Footnotes)
-
-- 15 Citation handling
-
-  - [ ] [15.1 Citations](https://orgmode.org/manual/Citations.html#Citations)
-  - [ ] [15.2 Citation export processors](https://orgmode.org/manual/Citation-export-processors.html#Citation-export-processors)
-
-- 16 Working with Source Code
-
-  - [ ] [16.2 Structure of Code Blocks](https://orgmode.org/manual/Structure-of-Code-Blocks.html#Structure-of-Code-Blocks)
-  - [ ] [16.3 Using Header Arguments](https://orgmode.org/manual/Using-Header-Arguments.html#Using-Header-Arguments)
-  - [ ] [16.4 Environment of a Code Block](https://orgmode.org/manual/Environment-of-a-Code-Block.html#Environment-of-a-Code-Block)
-  - [ ] [16.5 Evaluating Code Blocks](https://orgmode.org/manual/Evaluating-Code-Blocks.html#Evaluating-Code-Blocks)
-  - [ ] [16.6 Results of Evaluation](https://orgmode.org/manual/Results-of-Evaluation.html#Results-of-Evaluation)
-  - [ ] [16.7 Exporting Code Blocks](https://orgmode.org/manual/Exporting-Code-Blocks.html#Exporting-Code-Blocks)
-  - [ ] [16.8 Extracting Source Code](https://orgmode.org/manual/Extracting-Source-Code.html#Extracting-Source-Code)
-  - [ ] [16.9 Languages](https://orgmode.org/manual/Languages.html#Languages)
-  - [ ] [16.10 Editing Source Code](https://orgmode.org/manual/Editing-Source-Code.html#Editing-Source-Code)
-  - [ ] [16.11 Noweb Reference Syntax](https://orgmode.org/manual/Noweb-Reference-Syntax.html#Noweb-Reference-Syntax)
-  - [ ] [16.12 Library of Babel](https://orgmode.org/manual/Library-of-Babel.html#Library-of-Babel)
-  - [ ] [16.13 Key bindings and Useful Functions](https://orgmode.org/manual/Key-bindings-and-Useful-Functions.html#Key-bindings-and-Useful-Functions)
-  - [ ] [16.14 Batch Execution](https://orgmode.org/manual/Batch-Execution.html#Batch-Execution)
-
-Simple TODOs:
-
 * [x] Header, `* header``
+
   * [x] Tags, `* header1 :tag1:tag2:`
   * [ ] Properties
+
 * [x] Attribute, `#+title: org-file-parser-with-js`
+
 * [x] Emphasis, `~~, ==, ++, __, //, $$`
+
 * [ ] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
+
 * [ ] Subscripts and Superscripts
+
 * [ ] Unordered lists, `-, +, * `
+
 * [ ] Ordered lists, `1. 1)`
-* [ ] Blocks, `#+begin_xxx ... #end_xxx`
+
+* [x] Blocks, `#+begin_xxx ... #end_xxx`
+
+  * [x] block attributes, `:result both :noweb yes`
+
+    ```json
+    // :result both :noweb yes =>
+    [
+      { name: 'result', value: 'both' },
+      { name: 'noweb', value: 'yes' }
+    ]
+    ```
+
+  * [x] block options, `-n 20 -r`
+
+    ```json
+    // -n 20 -r =>
+    [
+      { name: 'n', value: '20' },
+      { name: 'r', value: '' }
+    ]
+    ```
+
 * [ ] [Links](https://orgmode.org/manual/Hyperlinks.html#Hyperlinks), `[[link][desc]], [[link]], <<inner-link>>`
+
 * [ ] TODO, DONE, etc. keywords
+
 * [ ] Table
 
 # Usage
