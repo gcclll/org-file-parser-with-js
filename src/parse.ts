@@ -84,7 +84,7 @@ export interface BlockNode extends Node {
   options: BlockOptions;
 }
 
-export type BlockOptions = Array<Attribute>
+export type BlockOptions = Array<Attribute>;
 
 export const enum DoStatus {
   DONE,
@@ -121,7 +121,7 @@ export const blockRE =
   /^(\s*)#\+begin_([\w-]+)\s+([\w-]+)\s+(:[^\n]+\n)\s*(.*)#\+end_(\2)/i;
 export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)(\s+[\w-]+)?(\s+.*)?/;
 export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
-export const blockOptionsRE = /-(\w)\s([^-]+)?/gi
+export const blockOptionsRE = /-(\w)\s([^-]+)?/gi;
 export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
@@ -178,7 +178,7 @@ export function parseBlock(
   if (matched == null) {
     return null;
   }
-  
+
   let i;
   // find nearest end block
   for (i = index + 1; i < list.length; i++) {
@@ -192,33 +192,43 @@ export function parseBlock(
   if (i === list.length) {
     throw new TypeError(`[parseBlock] content=${content}, no end block.`);
   }
-  
-  let attr = matched[4] || ''
+
+  let attr = matched[4] || '';
   // find the first `:` index
-  let optionEndIndex = attr.indexOf(':')
-  let options = [] as BlockOptions, optionString = ''
+  let optionEndIndex = attr.indexOf(':');
+  let options = [] as BlockOptions,
+    optionString = '';
 
   // parse #+begin_src emacs-lisp -n -r -> `-n -r`
   if (optionEndIndex > 0) {
-    optionString = attr.slice(0, optionEndIndex)
-    attr = attr.slice(optionEndIndex)
-    options = (parseCLIOption(optionString) || []) as BlockOptions
+    optionString = attr.slice(0, optionEndIndex);
+    attr = attr.slice(optionEndIndex);
+    options = (parseCLIOption(optionString) || []) as BlockOptions;
   }
 
+  const language = (matched[3] || '').trim();
+  const name = (matched[2] || '').trim();
   const node = {
     type: NodeTypes.BLOCK,
-    name: matched[2],
-    language: matched[3],
+    name,
+    language,
     content,
     code: list.slice(index + 1, i).join('\n'),
     indent: matched[1].length,
-    attributes: attr ? (' ' + attr)
-      .split(/\s+:/)
-      .filter(Boolean)
-      .map((item: string) => {
-        const [name, value] = item.split(/\s+/);
-        return { name, value };
-      }) : [],
+    attributes: attr
+      ? (' ' + attr)
+          .split(/\s+:/)
+          .filter(Boolean)
+          .map((item: string) => {
+            const [name, value = ''] = item.split(/\s+/);
+            if (name && value) {
+              return { name: name.trim(), value: value.trim() };
+            }
+            
+            return null
+          })
+          .filter(Boolean)
+      : [],
     options,
     index,
   };
@@ -230,17 +240,19 @@ export function parseBlock(
 }
 
 function parseCLIOption(str: string): BlockOptions {
-
   // add space word
-  str = ` ${str} `
+  str = ` ${str} `;
 
-  let result, nodes = []
+  let result,
+    nodes = [];
   while ((result = blockOptionsRE.exec(str))) {
-    const [, name, value = ''] = result
-    nodes.push({ name, value })
+    const [, name, value = ''] = result;
+    if (name) {
+      nodes.push({ name: name.trim(), value: (value || '').trim() });
+    }
   }
-  
-  return nodes
+
+  return nodes;
 }
 
 export function parseHeader(source: string, index: number): HeaderNode | null {
