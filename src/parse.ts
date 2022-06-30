@@ -199,7 +199,11 @@ export function parseBlock(
   let options = [] as BlockOptions,
     optionString = '';
 
-  // parse #+begin_src emacs-lisp -n -r -> `-n -r`
+  // FIX: #+begin_src emacs-lisp -n -r, without attributes
+  if (optionEndIndex === -1) {
+    optionEndIndex = attr.length
+  }
+
   if (optionEndIndex > 0) {
     optionString = attr.slice(0, optionEndIndex);
     attr = attr.slice(optionEndIndex);
