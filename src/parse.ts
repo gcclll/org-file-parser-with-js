@@ -119,7 +119,7 @@ export const propertyRE = /^(\s*)#\+(?!begin|end)([\w-_]+)\s*:(.*)$/i;
 export const headerRE = /^(\*+)\s+(.*)$/i;
 export const blockRE =
   /^(\s*)#\+begin_([\w-]+)\s+([\w-]+)\s+(:[^\n]+\n)\s*(.*)#\+end_(\2)/i;
-export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)\s+([\w-]+)\s+(.*)/;
+export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)(\s+[\w-]+)?(\s+.*)?/;
 export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
 export const blockOptionsRE = /-(\w)\s([^-]+)?/gi
 export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
@@ -193,7 +193,7 @@ export function parseBlock(
     throw new TypeError(`[parseBlock] content=${content}, no end block.`);
   }
   
-  let attr = matched[4]
+  let attr = matched[4] || ''
   // find the first `:` index
   let optionEndIndex = attr.indexOf(':')
   let options = [] as BlockOptions, optionString = ''
@@ -212,13 +212,13 @@ export function parseBlock(
     content,
     code: list.slice(index + 1, i).join('\n'),
     indent: matched[1].length,
-    attributes: (' ' + matched[4])
+    attributes: attr ? (' ' + attr)
       .split(/\s+:/)
       .filter(Boolean)
       .map((item: string) => {
         const [name, value] = item.split(/\s+/);
         return { name, value };
-      }),
+      }) : [],
     options,
     index,
   };

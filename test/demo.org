@@ -26,7 +26,7 @@ Once a link in the buffer is complete, with all brackets present, Org changes th
 
 * block node
 
-#+begin_src emacs-lisp -n -r :result both :noweb yes
+#+begin_src emacs-lisp
 (message "test emacs-lisp block 1")
 (message "test emacs-lisp block 2")
 (message "test emacs-lisp block 3")
