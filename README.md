@@ -1,3 +1,11 @@
+# CHANGELOG
+
+## 2022-06-30
+
+### Bugs
+
+- block can't be parsed correctly without attribute
+
 # TODOs
 
 * [x] Header, `* header``
