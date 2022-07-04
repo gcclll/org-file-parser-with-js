@@ -10,7 +10,8 @@ export const enum NodeTypes {
   PROPERTY, // #+...
   HEADER, // ** ...
   BLOCK, // #+begin...#+end
-  EMPHASIS, // =,_,/,+,$
+  TEXT_BLOCK, // non-src blocks, eg. example, textbox
+  EMPHASIS, // =,_,/,+,$,[!&%@]{2}
   LIST, // - [-], 1. ...
 
   // 各称链接
@@ -74,11 +75,11 @@ export interface InnerLinkNode extends Node {
 }
 
 export interface BlockNode extends Node {
-  type: NodeTypes.BLOCK;
+  type: NodeTypes.BLOCK | NodeTypes.TEXT_BLOCK;
   name: string;
   language: string;
   content: string;
-  code: string;
+  code: TextNode | string;
   indent: number;
   attributes: Array<Attribute>;
   options: BlockOptions;
@@ -102,6 +103,7 @@ export interface ListNode extends Node {
 
 export const inlineTagList = ['=', '+', '_', '/', '~', '*', '$'];
 export type InlineTag = '=' | '+' | '_' | '/' | '~' | '*' | '$';
+export const textBlockNames = ['example', 'textbox'] // non-src blocks name
 
 export interface EmphasisNode extends Node {
   type: NodeTypes.EMPHASIS;
@@ -126,7 +128,7 @@ export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
-export const emphasisRE = /([=~\+_/\$])(?=[^\s])([^\1]+?\S)(?:\1)/g;
+export const emphasisRE = /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 
 export function baseParse(
   source: string,
@@ -235,10 +237,16 @@ export function parseBlock(
       : [],
     options,
     index,
-  };
+  } as BlockNode;
 
   // remove code from original list
   list.splice(index + 1, i - index);
+  
+  // pure text blocks, eg. example, textbox
+  if (textBlockNames.indexOf(node.name) > -1) {
+    node.type = NodeTypes.TEXT_BLOCK
+    node.code = parseText(node.code as string, index)
+  }
 
   return node as BlockNode;
 }
@@ -368,11 +376,12 @@ export function parseEmphasisText(parent: TextNode): TextNode {
   if (source) {
     children.push({
       type: NodeTypes.TEXT,
-      content: source,
+      content: source.slice(cursor),
     });
   }
 
-  parent.children = children;
+  // filter out the empty content node
+  parent.children = children.filter(child => child.content !== '');
 
   return parent;
 }

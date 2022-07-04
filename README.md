@@ -9,13 +9,12 @@
 # TODOs
 
 * [x] Header, `* header``
-
   * [x] Tags, `* header1 :tag1:tag2:`
   * [ ] Properties
-
 * [x] Attribute, `#+title: org-file-parser-with-js`
-
 * [x] Emphasis, `~~, ==, ++, __, //, $$`
+
+​	more awesome: https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/
 
 * [ ] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
 
