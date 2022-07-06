@@ -10,7 +10,7 @@
 
 * [x] Header, `* header`
   * [x] Tags, `* header1 :tag1:tag2:`
-  * [ ] Properties
+  * [x] Properties
 * [x] Attribute, `#+title: org-file-parser-with-js`
 * [x] Emphasis, `~~, ==, ++, __, //, $$`
   * [ ] extra: `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`

@@ -9,6 +9,7 @@ export const enum NodeTypes {
   TEXT, // pure text
   PROPERTY, // #+...
   HEADER, // ** ...
+  HEADER_PROPERTIES,
   BLOCK, // #+begin...#+end
   TEXT_BLOCK, // non-src blocks, eg. example, textbox
   EMPHASIS, // =,_,/,+,$,[!&%@]{2}
@@ -36,11 +37,12 @@ export interface Node {
   tags?: string[];
 }
 
-export interface FootNode {
+export interface PairNode<T> {
   name: string;
-  value: string;
+  value: T;
 }
 
+export interface FootNode extends PairNode<string> {}
 export interface TextNode extends Node {
   type: NodeTypes.TEXT;
 }
@@ -69,12 +71,10 @@ export interface HeaderNode extends Node {
   type: NodeTypes.HEADER;
   title: string;
   level: number;
+  properties: Array<{ name: string; value: string | Timestamp }>;
 }
 
-export interface Attribute {
-  name: string;
-  value: string;
-}
+export interface Attribute extends PairNode<string> {}
 
 export interface ExternalLinkNode extends Node {
   type: NodeTypes.EXTERNAL_LINK;
@@ -146,6 +146,7 @@ export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
+export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 
 export function baseParse(
   source: string,
@@ -158,7 +159,7 @@ export function baseParse(
   options;
   list;
 
-  const nodes: any = [];
+  let nodes: any = [];
 
   for (let i = 0; i < list.length; i++) {
     const node = parseNode(list[i], list, i);
@@ -166,7 +167,9 @@ export function baseParse(
       nodes.push(node);
     }
   }
-  return nodes;
+
+  // filter the empty string node
+  return nodes.filter((node: any) => node && node.content !== '');
 }
 
 export function parseNode(content: string, list: string[], index: number) {
@@ -177,7 +180,7 @@ export function parseNode(content: string, list: string[], index: number) {
   } else if (propertyRE.test(content)) {
     node = parseProperty(content, index);
   } else if (headerRE.test(content)) {
-    node = parseHeader(content, index);
+    node = parseHeader(content, index, list);
   }
 
   if (!node) {
@@ -284,7 +287,11 @@ function parseCLIOption(str: string): BlockOptions {
   return nodes;
 }
 
-export function parseHeader(source: string, index: number): HeaderNode | null {
+export function parseHeader(
+  source: string,
+  index: number,
+  list: string[]
+): HeaderNode | null {
   const { content, tags } = parseTags(source);
 
   const matched = content.match(headerRE);
@@ -295,6 +302,46 @@ export function parseHeader(source: string, index: number): HeaderNode | null {
 
   const [text, stars, title] = matched;
 
+  const properties: Array<PairNode<string | Timestamp>> = [];
+  // find deadline & properties
+  for (let i = index + 1; i < list.length; i++) {
+    const next = list[i];
+    // next header, exit
+    if (headerRE.test(next)) break;
+    console.log(next, i)
+    let matched;
+    if (deadlineRE.test(next)) {
+      matched = next.match(deadlineRE);
+      if (matched) {
+        list[i] = ''
+        properties.push({
+          name: 'deadline',
+          value: matchTimestamp(matched[1]),
+        });
+      }
+    } else if (/^\s*:PROPERTIES:/.test(next)) {
+      const endIdx = findIndex(list, (ele: string) => {
+        return /^\s*:END:/.test(ele)
+      }, i)
+      
+      if (endIdx === -1) {
+        // error header properties syntax
+        throw new SyntaxError(`[parseHeader|PROPERTIES] no properties end tag.`)
+      }
+
+      const propList = list.slice(i + 1, endIdx + i)
+      // remove from original list
+      list.splice(i, propList.length + 2, '')
+      propList.forEach(prop => {
+        const match = prop.match(/^\s*:([\w-_]+):(.*)/i)
+        match && properties.push({
+          name: match[1].toLowerCase(),
+          value: match[2].trim()
+        })
+      })
+    }
+  }
+
   return {
     type: NodeTypes.HEADER,
     content: text,
@@ -303,6 +350,7 @@ export function parseHeader(source: string, index: number): HeaderNode | null {
     indent: 0,
     tags,
     level: stars.length,
+    properties,
   };
 }
 
@@ -495,4 +543,25 @@ export function matchTimestamp(timestamp: string): Timestamp {
   }
 
   return result as Timestamp;
+}
+
+export function extractHeaderProperties(nodes: any) {
+  const list: any = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (node.type === NodeTypes.HEADER) {
+      // TODO
+    }
+  }
+
+  return list;
+}
+
+function findIndex(
+  list: Array<any>,
+  callback: (element: any, index: number, list: Array<any>) => any,
+  fromIndex: number = 0
+) {
+  return list.slice(fromIndex).findIndex(callback);
 }

@@ -21,4 +21,10 @@ test box
 
 #+end_textbox
 
+* header1
+DEADLINE: <2022-07-06 Wed>
+:PROPERTIES:
+:STYLE: .test{color:red}
+:END:
+
 
