@@ -5,22 +5,20 @@
 
 I'am test test!!!!
 
+<2022-02-12 18:00 Wed +1d> test <2033-03-13 22:00> test !!xxx!!
+
 #+begin_textbox
 test box
 
-!!test!!
+!!test!! !@test!@ !%test!% !&test!&
 
-@@test@@
+@!test@! @@test@@ @%test@% @&test@&
 
-!@test!@
+%!test%! %@test%@ %%test%% %&test%&
 
-!&test!&
+&!test&! &@test&@ &%test&% &&test&&
+
+
 #+end_textbox
 
-
-before1 !@test!@ after1
-
-before2 !!test!! after2
-
-before3 !&test!& after3
 

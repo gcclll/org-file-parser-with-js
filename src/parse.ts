@@ -13,6 +13,7 @@ export const enum NodeTypes {
   TEXT_BLOCK, // non-src blocks, eg. example, textbox
   EMPHASIS, // =,_,/,+,$,[!&%@]{2}
   LIST, // - [-], 1. ...
+  TIMESTAMP, // <2022-11-12 Wed 12:00>
 
   // 各称链接
   EXTERNAL_LINK, // [[url][name]]
@@ -42,6 +43,20 @@ export interface FootNode {
 
 export interface TextNode extends Node {
   type: NodeTypes.TEXT;
+}
+
+interface Timestamp {
+  year: string;
+  month: string;
+  day: string;
+  week?: string;
+  time?: string;
+  dein?: string; // [+-]\d[wdmy], per month/day/week/year date
+}
+export interface TimestampNode extends Node {
+  type: NodeTypes.TIMESTAMP;
+  timestamp: Timestamp;
+  value: string;
 }
 
 export interface PropertyNode extends Node {
@@ -103,7 +118,7 @@ export interface ListNode extends Node {
 
 export const inlineTagList = ['=', '+', '_', '/', '~', '*', '$'];
 export type InlineTag = '=' | '+' | '_' | '/' | '~' | '*' | '$';
-export const textBlockNames = ['example', 'textbox'] // non-src blocks name
+export const textBlockNames = ['example', 'textbox']; // non-src blocks name
 
 export interface EmphasisNode extends Node {
   type: NodeTypes.EMPHASIS;
@@ -128,7 +143,9 @@ export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
-export const emphasisRE = /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
+export const emphasisRE =
+  /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
+export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 
 export function baseParse(
   source: string,
@@ -136,7 +153,7 @@ export function baseParse(
     onError: (error: Error) => console.warn(error),
   }
 ) {
-  const list = source.split(/\n+/); //.map(row => row.replace(/^[\s\t\f\r\n]+/g, ''))
+  const list = source.split(/\n+/);
 
   options;
   list;
@@ -203,7 +220,7 @@ export function parseBlock(
 
   // FIX: #+begin_src emacs-lisp -n -r, without attributes
   if (optionEndIndex === -1) {
-    optionEndIndex = attr.length
+    optionEndIndex = attr.length;
   }
 
   if (optionEndIndex > 0) {
@@ -230,8 +247,8 @@ export function parseBlock(
             if (name && value) {
               return { name: name.trim(), value: value.trim() };
             }
-            
-            return null
+
+            return null;
           })
           .filter(Boolean)
       : [],
@@ -241,11 +258,11 @@ export function parseBlock(
 
   // remove code from original list
   list.splice(index + 1, i - index);
-  
+
   // pure text blocks, eg. example, textbox
   if (textBlockNames.indexOf(node.name) > -1) {
-    node.type = NodeTypes.TEXT_BLOCK
-    node.code = parseText(node.code as string, index)
+    node.type = NodeTypes.TEXT_BLOCK;
+    node.code = parseText(node.code as string, index);
   }
 
   return node as BlockNode;
@@ -331,8 +348,63 @@ export function parseText(content: string, index: number): TextNode {
     index,
   };
 
+  // 1. parse emphasis text
+  parseEmphasisText(node);
+
+  // 2. parse timestamp text
+  parseTimestamp(node);
+
   // 将内容解析成 children，content 置空
-  return parseEmphasisText(node);
+  return node;
+}
+
+export function parseTimestamp(node: TextNode): TextNode {
+  const children: any = [];
+
+  node.children!.forEach((child: any) => {
+    let cursor = 0,
+      result;
+    const source = child.content;
+    if (child.type === NodeTypes.TEXT && source) {
+      while ((result = timestampRE.exec(source))) {
+        const [matchText, value] = result;
+
+        const pureText = source.slice(cursor, result.index);
+
+        // left text node
+        children.push({
+          type: NodeTypes.TEXT,
+          content: pureText,
+        });
+
+        // 2022-02-12 Wed 10:00 => { year: '2022', month: '02', day: '12', week: 'Wed', time: '10:00' }
+        const timestamp: Timestamp = matchTimestamp(value);
+
+        children.push({
+          ...child,
+          type: NodeTypes.TIMESTAMP,
+          timestamp,
+          content: matchText,
+          value,
+        });
+
+        cursor = result.index + matchText.length;
+      }
+
+      if (source) {
+        children.push({
+          type: NodeTypes.TEXT,
+          content: source.slice(cursor),
+        });
+      }
+    } else {
+      children.push(child);
+    }
+  });
+
+  node.children = children.filter((child: any) => child!.content !== '');
+
+  return node;
 }
 
 /**
@@ -381,7 +453,7 @@ export function parseEmphasisText(parent: TextNode): TextNode {
   }
 
   // filter out the empty content node
-  parent.children = children.filter(child => child.content !== '');
+  parent.children = children.filter((child) => child.content !== '');
 
   return parent;
 }
@@ -406,4 +478,21 @@ function parseTags(content: string): {
     tags,
     content,
   };
+}
+
+export function matchTimestamp(timestamp: string): Timestamp {
+  const re =
+    /((?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})|(?<week>\w{3})|(?<time>\d{2}:\d{2}(-\d{2}:\d{2})?)|(?<dein>[-+]\d+[wydm]))/gi;
+
+  let result: any = {};
+  for (const match of timestamp.matchAll(re)) {
+    const gs = match.groups;
+    if (gs) {
+      Object.keys(gs).forEach((key) => {
+        if (gs[key]) result[key as string] = gs[key];
+      });
+    }
+  }
+
+  return result as Timestamp;
 }
