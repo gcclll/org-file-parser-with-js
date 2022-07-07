@@ -39,10 +39,9 @@ export interface Node {
   tags?: string[];
 }
 
-
 export interface StateNode {
-  type: NodeTypes.STATE
-  content: 'TODO' | 'DONE' | 'CANCELLED'
+  type: NodeTypes.STATE;
+  content: 'TODO' | 'DONE' | 'CANCELLED';
 }
 
 export interface PairNode<T> {
@@ -123,6 +122,7 @@ export interface ListNode extends Node {
   content: string;
   isOrder: boolean;
   status: DoStatus;
+  tag: string;
 }
 
 export const inlineTagList = ['=', '+', '_', '/', '~', '*', '$'];
@@ -148,17 +148,17 @@ export const blockRE =
 export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)(\s+[\w-]+)?(\s+.*)?/;
 export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
 export const blockOptionsRE = /-(\w)\s([^-]+)?/gi;
-export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]]\s+)?(.*)$/;
-export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]]\s+)?(.*)$/;
-export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
+export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]\s+)?(.*)$/;
+export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
+export const extLinkRE = /\[\[([^[\]]+)](\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 
-const states: Array<StateNode['content']> = ['TODO', 'DONE', 'CANCELLED']
-export const stateRE = new RegExp(`(${states.join('|')})`, 'g')
+const states: Array<StateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
+export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
 
 export function baseParse(
   source: string,
@@ -188,11 +188,15 @@ export function parseNode(content: string, list: string[], index: number) {
   let node: any;
 
   if (blockBeginRE.test(content)) {
-    node = parseBlock(content, list, index);
+    node = parseBlock(content, index, list);
   } else if (propertyRE.test(content)) {
     node = parseProperty(content, index);
   } else if (headerRE.test(content)) {
     node = parseHeader(content, index, list);
+  } else if (unorderListRE.test(content)) {
+    node = parseList(content, index, list, false);
+  } else if (orderListRE.test(content)) {
+    node = parseList(content, index, list, true);
   }
 
   if (!node) {
@@ -202,10 +206,39 @@ export function parseNode(content: string, list: string[], index: number) {
   return node;
 }
 
+export function parseList(
+  content: string,
+  index: number,
+  list: string[],
+  isOrder: boolean
+) {
+  const re = isOrder ? orderListRE : unorderListRE
+  const [, indent, tag, state, contentText] = re.exec(content) || []
+  
+  let children: Array<any> = [] // find children by indent level bigger then current list item
+
+  for (let i = index + 1; i < list.length; i++) {
+    const node = list[i]
+    if (unorderListRE.test(node) || orderListRE.test(node) || headerRE.test(node)) {
+      break
+    }
+  }
+  
+  return {
+    content: parseText(contentText, index),
+    children,
+    tag: tag.trim(),
+    state: state.trim().replace(/^\[|\]$/, ''), // ' ', '-', 'x'
+    isOrder,
+    index,
+    indent: indent.length
+  };
+}
+
 export function parseBlock(
   content: string,
-  list: string[],
-  index: number
+  index: number,
+  list: string[]
 ): BlockNode | null {
   const matched = blockBeginRE.exec(content);
 
@@ -372,12 +405,6 @@ export function parseHeader(
   };
 }
 
-/**
- * 解析文中出现的 `#+title: title content`
- * @param {string} content
- * @param {number} index
- * @returns
- */
 export function parseProperty(
   content: string,
   index: number
@@ -409,12 +436,15 @@ export function parseText(content: string, index: number): TextNode {
   const node: TextNode = {
     type: NodeTypes.TEXT,
     content: content.trim(),
-    children: [{ // foreach to handle more special text node
-      type: NodeTypes.TEXT,
-      content: content.trim(),
-      indent,
-      index,
-    }],
+    children: [
+      {
+        // foreach to handle more special text node
+        type: NodeTypes.TEXT,
+        content: content.trim(),
+        indent,
+        index,
+      },
+    ],
     indent,
     index,
   };
@@ -427,12 +457,12 @@ export function parseText(content: string, index: number): TextNode {
 
   // 3. parse external links(inc. image) in text
   parseExternalLink(node);
-  
+
   // 4. parse inner links
-  parseInnerLink(node)
-  
+  parseInnerLink(node);
+
   // 5. parse state keywords(eg. TODO, DONE, CANCELLED)
-  parseStateKeywords(node)
+  parseStateKeywords(node);
 
   // 将内容解析成 children，content 置空
   return node;
@@ -440,42 +470,42 @@ export function parseText(content: string, index: number): TextNode {
 
 export function parseEmphasisText(node: TextNode) {
   parseTextExtra(node, emphasisRE, (values: string[]) => {
-    const [sign, matchValue] = values
-    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue }
-  })
+    const [sign, matchValue] = values;
+    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue };
+  });
 }
 
 export function parseTimestamp(node: TextNode) {
   parseTextExtra(node, timestampRE, (values: string[]) => {
-    const timestamp: Timestamp = matchTimestamp(values[0])
-    return { timestamp, type: NodeTypes.TIMESTAMP }
-  })
+    const timestamp: Timestamp = matchTimestamp(values[0]);
+    return { timestamp, type: NodeTypes.TIMESTAMP };
+  });
 }
 
 export function parseExternalLink(node: TextNode) {
   parseTextExtra(node, extLinkRE, (values: string[]) => {
-    const [url, description] = values
-    const trimUrl = url.trim()
+    const [url, description] = values;
+    const trimUrl = url.trim();
     // [[url:abbrev][description]]
-    const match = /:([\w_-]+)$/.exec(trimUrl)
-    let abbrev = ''
+    const match = /:([\w_-]+)$/.exec(trimUrl);
+    let abbrev = '';
     if (match) {
-      abbrev = match[1] || ''
+      abbrev = match[1] || '';
     }
-    return { type: NodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev }
-  })
+    return { type: NodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev };
+  });
 }
 
 export function parseInnerLink(node: TextNode) {
   parseTextExtra(node, innerLinkRE, (values: string[]) => {
-    return { type: NodeTypes.INNER_LINK, url: values[0] }
-  })
+    return { type: NodeTypes.INNER_LINK, url: values[0] };
+  });
 }
 
 export function parseStateKeywords(node: TextNode) {
   parseTextExtra(node, stateRE, (values: string[]) => {
-    return { type: NodeTypes.STATE, content: values[0] }
-  })
+    return { type: NodeTypes.STATE, content: values[0] };
+  });
 }
 
 function parseTags(content: string): {
@@ -539,49 +569,54 @@ function findIndex(
 }
 
 // parse something in text node
-function parseTextExtra(node: TextNode, re: RegExp, parser: (val: string[]) => any) {
-  const children: any = []
-  
+function parseTextExtra(
+  node: TextNode,
+  re: RegExp,
+  parser: (val: string[]) => any
+) {
+  const children: any = [];
+
   node.children!.forEach((child: any) => {
-    let cursor = 0, result;
-    const source = child.content
+    let cursor = 0,
+      result;
+    const source = child.content;
     if (child.type === NodeTypes.TEXT && source) {
       while ((result = re.exec(source))) {
-        const [matchText, ...values] = result
-        const pureText = source.slice(cursor, result.index)
+        const [matchText, ...values] = result;
+        const pureText = source.slice(cursor, result.index);
         // left text node
         children.push({
           type: NodeTypes.TEXT,
-          content: pureText
-        })
-        
+          content: pureText,
+        });
+
         // current node, more value to outer fn
-        const current  = parser(values)
-        
+        const current = parser(values);
+
         if (current) {
           children.push({
             ...child,
             ...current,
             content: matchText,
-          })
+          });
         }
-        
-        cursor = result.index + matchText.length
+
+        cursor = result.index + matchText.length;
       }
-      
+
       if (source) {
         // right text node
         children.push({
           type: NodeTypes.TEXT,
-          content: source.slice(cursor)
-        })
+          content: source.slice(cursor),
+        });
       }
     } else {
-      children.push(child)
+      children.push(child);
     }
-  })
-  
-  node.children = children.filter((child: any) => child!.content !== '')
-  
-  return node
+  });
+
+  node.children = children.filter((child: any) => child!.content !== '');
+
+  return node;
 }
