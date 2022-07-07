@@ -19,6 +19,8 @@ export const enum NodeTypes {
   // 各称链接
   EXTERNAL_LINK, // [[url][name]]
   INNER_LINK, // <<meta_id>>
+
+  STATE, // TODO, DONE, etc.
 }
 
 export interface RootNode {
@@ -30,11 +32,17 @@ export interface RootNode {
 
 export interface Node {
   type: NodeTypes;
-  content: string;
+  content: string | TextNode;
   indent: number;
   index: number;
   children?: any[];
   tags?: string[];
+}
+
+
+export interface StateNode {
+  type: NodeTypes.STATE
+  content: 'TODO' | 'DONE' | 'CANCELLED'
 }
 
 export interface PairNode<T> {
@@ -81,6 +89,7 @@ export interface ExternalLinkNode extends Node {
   content: string;
   url: string;
   description?: string;
+  abbrev?: string; // [[url:abbrev][description]]
 }
 
 export interface InnerLinkNode extends Node {
@@ -147,6 +156,9 @@ export const emphasisRE =
   /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
+
+const states: Array<StateNode['content']> = ['TODO', 'DONE', 'CANCELLED']
+export const stateRE = new RegExp(`(${states.join('|')})`, 'g')
 
 export function baseParse(
   source: string,
@@ -300,7 +312,7 @@ export function parseHeader(
     return null;
   }
 
-  const [text, stars, title] = matched;
+  const [, stars, title] = matched;
 
   const properties: Array<PairNode<string | Timestamp>> = [];
   // find deadline & properties
@@ -308,7 +320,6 @@ export function parseHeader(
     const next = list[i];
     // next header, exit
     if (headerRE.test(next)) break;
-    console.log(next, i);
     let matched;
     if (deadlineRE.test(next)) {
       matched = next.match(deadlineRE);
@@ -351,7 +362,7 @@ export function parseHeader(
 
   return {
     type: NodeTypes.HEADER,
-    content: text,
+    content: parseText(title, index), // title contains special node
     title,
     index,
     indent: 0,
@@ -415,10 +426,23 @@ export function parseText(content: string, index: number): TextNode {
   parseTimestamp(node);
 
   // 3. parse external links(inc. image) in text
-  // parseLinks(node);
+  parseExternalLink(node);
+  
+  // 4. parse inner links
+  parseInnerLink(node)
+  
+  // 5. parse state keywords(eg. TODO, DONE, CANCELLED)
+  parseStateKeywords(node)
 
   // 将内容解析成 children，content 置空
   return node;
+}
+
+export function parseEmphasisText(node: TextNode) {
+  parseTextExtra(node, emphasisRE, (values: string[]) => {
+    const [sign, matchValue] = values
+    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue }
+  })
 }
 
 export function parseTimestamp(node: TextNode) {
@@ -428,17 +452,29 @@ export function parseTimestamp(node: TextNode) {
   })
 }
 
+export function parseExternalLink(node: TextNode) {
+  parseTextExtra(node, extLinkRE, (values: string[]) => {
+    const [url, description] = values
+    const trimUrl = url.trim()
+    // [[url:abbrev][description]]
+    const match = /:([\w_-]+)$/.exec(trimUrl)
+    let abbrev = ''
+    if (match) {
+      abbrev = match[1] || ''
+    }
+    return { type: NodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev }
+  })
+}
 
-/**
- * 解析正文中的特殊文本
- * 如：~code~, =code=, +删除线+, _下划线_, *加粗*, $latex$, 或可自定义。
- * @params {TextNode} parent 正文解析出来的节点挂到文本节点上去
- * @return {TextNode}
- */
-export function parseEmphasisText(node: TextNode) {
-  parseTextExtra(node, emphasisRE, (values: string[]) => {
-    const [sign, matchValue] = values
-    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue }
+export function parseInnerLink(node: TextNode) {
+  parseTextExtra(node, innerLinkRE, (values: string[]) => {
+    return { type: NodeTypes.INNER_LINK, url: values[0] }
+  })
+}
+
+export function parseStateKeywords(node: TextNode) {
+  parseTextExtra(node, stateRE, (values: string[]) => {
+    return { type: NodeTypes.STATE, content: values[0] }
   })
 }
 

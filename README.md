@@ -9,17 +9,40 @@
 # TODOs
 
 * [x] Header, `* header`
-  * [x] Tags, `* header1 :tag1:tag2:`
-  * [x] Properties
-* [x] Attribute, `#+title: org-file-parser-with-js`
-* [x] Emphasis, `~~, ==, ++, __, //, $$`
-  * [ ] extra: `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
 
-​		more awesome: https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/
+  * [x] Tags, `* header1 :tag1:tag2:`
+
+  * [x] Properties
+
+  * [x] parse header title as text, use `parseText()`
+
+    `* TODO header1 :tag1:tag2` =>
+
+    ```json
+    {
+      type: NodeTypes.HEADER,
+      content: {
+        type: NodeTypes.TEXT,
+        children: [
+          { type: NodeTypes.STATE, content: 'TODO' }
+          { type: NodeTypes.TEXT, content: 'header1' }
+        ]
+      },
+    	tags: ['tag1', 'tag2']
+    }
+    ```
+
+    
+
+* [x] Attribute, `#+title: org-file-parser-with-js`
+
+* [x] Emphasis, `~~, ==, ++, __, //, $$`
+
+  * [x] [extra]( https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) : `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
 
 * [x] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
 
-* [ ] [Images](https://orgmode.org/manual/Images.html)
+* [x] [Images](https://orgmode.org/manual/Images.html)
 
 * [ ] Subscripts and Superscripts
 
@@ -50,6 +73,30 @@
     ```
 
 * [ ] [Links](https://orgmode.org/manual/Hyperlinks.html#Hyperlinks), `[[link][desc]], [[link]], <<inner-link>>`
+
+  * [x] [External link](https://orgmode.org/manual/External-Links.html) `[[url][desc]]`
+
+    Support link types: **file**，**attachment**，**bbdb**，**docview**，**doi**，**gnus**，**elisp**，**gnus**，**rmail**，**mhe**，**help**，**http**，**https**，**id**，**info**，**irc**，**mailto**，**news**，**shell**，etc.
+
+    more details to -> https://orgmode.org/manual/External-Links.html
+
+  * [x] Inner link, `<<inner-link>>`
+
+    It is an inner link meta. Eg. 
+
+    ```
+    1. one item
+    2. <<target>>another item
+    Here we refer to item [[target]].
+    ```
+
+    So, inner link(`<<target>>`) is related to a external link(`[[target]]`)
+
+  * [ ] Triple argular brackets `<<<radio link>>>`
+
+  * [x] Link Abbreviations
+
+    This will only support `#+LINK: abrrev https://....`, do not support **Emacs Lisp** variables.
 
 * [ ] TODO, DONE, etc. keywords
 

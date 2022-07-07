@@ -7,6 +7,14 @@ I'am test test!!!!
 
 <2022-02-12 18:00 Wed +1d> test <2033-03-13 22:00> test !!xxx!!
 
+I'm an image link [[a.png]], you can display it in org file.
+
+inner link: <<test>> ???
+
+keywords: TODO, DONE, CANCELLED, ???
+
+link with abbrev: [[d.png:d-img][description]] ???
+
 #+begin_textbox
 test box
 
@@ -21,7 +29,7 @@ test box
 
 #+end_textbox
 
-* header1
+* TODO header1 :tag1:tag2:
 DEADLINE: <2022-07-06 Wed>
 :PROPERTIES:
 :STYLE: .test{color:red}
