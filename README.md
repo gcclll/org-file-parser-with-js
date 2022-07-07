@@ -19,6 +19,8 @@
 
 * [x] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
 
+* [ ] [Images](https://orgmode.org/manual/Images.html)
+
 * [ ] Subscripts and Superscripts
 
 * [ ] Unordered lists, `-, +, * `

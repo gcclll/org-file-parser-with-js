@@ -308,37 +308,44 @@ export function parseHeader(
     const next = list[i];
     // next header, exit
     if (headerRE.test(next)) break;
-    console.log(next, i)
+    console.log(next, i);
     let matched;
     if (deadlineRE.test(next)) {
       matched = next.match(deadlineRE);
       if (matched) {
-        list[i] = ''
+        list[i] = '';
         properties.push({
           name: 'deadline',
           value: matchTimestamp(matched[1]),
         });
       }
     } else if (/^\s*:PROPERTIES:/.test(next)) {
-      const endIdx = findIndex(list, (ele: string) => {
-        return /^\s*:END:/.test(ele)
-      }, i)
-      
+      const endIdx = findIndex(
+        list,
+        (ele: string) => {
+          return /^\s*:END:/.test(ele);
+        },
+        i
+      );
+
       if (endIdx === -1) {
         // error header properties syntax
-        throw new SyntaxError(`[parseHeader|PROPERTIES] no properties end tag.`)
+        throw new SyntaxError(
+          `[parseHeader|PROPERTIES] no properties end tag.`
+        );
       }
 
-      const propList = list.slice(i + 1, endIdx + i)
+      const propList = list.slice(i + 1, endIdx + i);
       // remove from original list
-      list.splice(i, propList.length + 2, '')
-      propList.forEach(prop => {
-        const match = prop.match(/^\s*:([\w-_]+):(.*)/i)
-        match && properties.push({
-          name: match[1].toLowerCase(),
-          value: match[2].trim()
-        })
-      })
+      list.splice(i, propList.length + 2, '');
+      propList.forEach((prop) => {
+        const match = prop.match(/^\s*:([\w-_]+):(.*)/i);
+        match &&
+          properties.push({
+            name: match[1].toLowerCase(),
+            value: match[2].trim(),
+          });
+      });
     }
   }
 
@@ -391,7 +398,12 @@ export function parseText(content: string, index: number): TextNode {
   const node: TextNode = {
     type: NodeTypes.TEXT,
     content: content.trim(),
-    children: [],
+    children: [{ // foreach to handle more special text node
+      type: NodeTypes.TEXT,
+      content: content.trim(),
+      indent,
+      index,
+    }],
     indent,
     index,
   };
@@ -402,58 +414,20 @@ export function parseText(content: string, index: number): TextNode {
   // 2. parse timestamp text
   parseTimestamp(node);
 
+  // 3. parse external links(inc. image) in text
+  // parseLinks(node);
+
   // 将内容解析成 children，content 置空
   return node;
 }
 
-export function parseTimestamp(node: TextNode): TextNode {
-  const children: any = [];
-
-  node.children!.forEach((child: any) => {
-    let cursor = 0,
-      result;
-    const source = child.content;
-    if (child.type === NodeTypes.TEXT && source) {
-      while ((result = timestampRE.exec(source))) {
-        const [matchText, value] = result;
-
-        const pureText = source.slice(cursor, result.index);
-
-        // left text node
-        children.push({
-          type: NodeTypes.TEXT,
-          content: pureText,
-        });
-
-        // 2022-02-12 Wed 10:00 => { year: '2022', month: '02', day: '12', week: 'Wed', time: '10:00' }
-        const timestamp: Timestamp = matchTimestamp(value);
-
-        children.push({
-          ...child,
-          type: NodeTypes.TIMESTAMP,
-          timestamp,
-          content: matchText,
-          value,
-        });
-
-        cursor = result.index + matchText.length;
-      }
-
-      if (source) {
-        children.push({
-          type: NodeTypes.TEXT,
-          content: source.slice(cursor),
-        });
-      }
-    } else {
-      children.push(child);
-    }
-  });
-
-  node.children = children.filter((child: any) => child!.content !== '');
-
-  return node;
+export function parseTimestamp(node: TextNode) {
+  parseTextExtra(node, timestampRE, (values: string[]) => {
+    const timestamp: Timestamp = matchTimestamp(values[0])
+    return { timestamp, type: NodeTypes.TIMESTAMP }
+  })
 }
+
 
 /**
  * 解析正文中的特殊文本
@@ -461,49 +435,11 @@ export function parseTimestamp(node: TextNode): TextNode {
  * @params {TextNode} parent 正文解析出来的节点挂到文本节点上去
  * @return {TextNode}
  */
-export function parseEmphasisText(parent: TextNode): TextNode {
-  let source = parent.content;
-
-  if (!source) return parent;
-  const children = [];
-
-  let result,
-    cursor = 0;
-  while ((result = emphasisRE.exec(source))) {
-    // eg. content: ~bala bala~, sign = "~", value = "bala bala"
-    const [matchText, sign, matchValue] = result;
-
-    const pureText = source.slice(cursor, result.index);
-
-    // left text node
-    children.push({
-      type: NodeTypes.TEXT,
-      content: pureText,
-    });
-
-    // emphasis node
-    children.push({
-      type: NodeTypes.EMPHASIS,
-      tag: sign,
-      content: matchValue,
-    });
-
-    // 保留上次遍历的游标位置，主要用来切割纯文本
-    cursor = result.index + matchText.length;
-  }
-
-  // 最后的文本
-  if (source) {
-    children.push({
-      type: NodeTypes.TEXT,
-      content: source.slice(cursor),
-    });
-  }
-
-  // filter out the empty content node
-  parent.children = children.filter((child) => child.content !== '');
-
-  return parent;
+export function parseEmphasisText(node: TextNode) {
+  parseTextExtra(node, emphasisRE, (values: string[]) => {
+    const [sign, matchValue] = values
+    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue }
+  })
 }
 
 function parseTags(content: string): {
@@ -564,4 +500,52 @@ function findIndex(
   fromIndex: number = 0
 ) {
   return list.slice(fromIndex).findIndex(callback);
+}
+
+// parse something in text node
+function parseTextExtra(node: TextNode, re: RegExp, parser: (val: string[]) => any) {
+  const children: any = []
+  
+  node.children!.forEach((child: any) => {
+    let cursor = 0, result;
+    const source = child.content
+    if (child.type === NodeTypes.TEXT && source) {
+      while ((result = re.exec(source))) {
+        const [matchText, ...values] = result
+        const pureText = source.slice(cursor, result.index)
+        // left text node
+        children.push({
+          type: NodeTypes.TEXT,
+          content: pureText
+        })
+        
+        // current node, more value to outer fn
+        const current  = parser(values)
+        
+        if (current) {
+          children.push({
+            ...child,
+            ...current,
+            content: matchText,
+          })
+        }
+        
+        cursor = result.index + matchText.length
+      }
+      
+      if (source) {
+        // right text node
+        children.push({
+          type: NodeTypes.TEXT,
+          content: source.slice(cursor)
+        })
+      }
+    } else {
+      children.push(child)
+    }
+  })
+  
+  node.children = children.filter((child: any) => child!.content !== '')
+  
+  return node
 }
