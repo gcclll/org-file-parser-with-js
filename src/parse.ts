@@ -1,10 +1,10 @@
 export const isArray = Array.isArray;
 
-export interface ParserOptions {
+export interface OrgParserOptions {
   onError: (error: Error) => void;
 }
 
-export const enum NodeTypes {
+export const enum OrgNodeTypes {
   ROOT, // 根节点
   TEXT, // pure text
   PROPERTY, // #+...
@@ -23,38 +23,39 @@ export const enum NodeTypes {
   STATE, // TODO, DONE, etc.
 }
 
-export interface RootNode {
-  metas: Attribute[]; // 页面头部所有属性
+
+export interface OrgRootNode {
+  metas: OrgAttribute[]; // 页面头部所有属性
   children: any[];
-  footnotes: FootNode[]; // 脚注节点gs./l
+  footnotes: OrgFootNode[]; // 脚注节点gs./l
   // TODO more...
 }
 
-export interface Node {
-  type: NodeTypes;
-  content: string | TextNode;
+export interface OrgNode {
+  type: OrgNodeTypes;
+  content: string | OrgTextNode;
   indent: number;
   index: number;
   children?: any[];
   tags?: string[];
 }
 
-export interface StateNode {
-  type: NodeTypes.STATE;
+export interface OrgStateNode {
+  type: OrgNodeTypes.STATE;
   content: 'TODO' | 'DONE' | 'CANCELLED';
 }
 
-export interface PairNode<T> {
+export interface OrgPairNode<T> {
   name: string;
   value: T;
 }
 
-export interface FootNode extends PairNode<string> {}
-export interface TextNode extends Node {
-  type: NodeTypes.TEXT;
+export interface OrgFootNode extends OrgPairNode<string> {}
+export interface OrgTextNode extends OrgNode {
+  type: OrgNodeTypes.TEXT;
 }
 
-interface Timestamp {
+interface OrgTimestamp {
   year: string;
   month: string;
   day: string;
@@ -62,84 +63,84 @@ interface Timestamp {
   time?: string;
   dein?: string; // [+-]\d[wdmy], per month/day/week/year date
 }
-export interface TimestampNode extends Node {
-  type: NodeTypes.TIMESTAMP;
-  timestamp: Timestamp;
+export interface OrgTimestampNode extends OrgNode {
+  type: OrgNodeTypes.TIMESTAMP;
+  timestamp: OrgTimestamp;
   value: string;
 }
 
-export interface PropertyNode extends Node {
-  type: NodeTypes.PROPERTY;
+export interface OrgPropertyNode extends OrgNode {
+  type: OrgNodeTypes.PROPERTY;
   name: string;
   value: string;
 }
 
-export interface HeaderNode extends Node {
-  type: NodeTypes.HEADER;
+export interface OrgHeaderNode extends OrgNode {
+  type: OrgNodeTypes.HEADER;
   title: string;
   level: number;
-  properties: Array<{ name: string; value: string | Timestamp }>;
+  properties: Array<{ name: string; value: string | OrgTimestamp }>;
 }
 
-export interface Attribute extends PairNode<string> {}
+export interface OrgAttribute extends OrgPairNode<string> {}
 
-export interface ExternalLinkNode extends Node {
-  type: NodeTypes.EXTERNAL_LINK;
+export interface OrgExternalLinkNode extends OrgNode {
+  type: OrgNodeTypes.EXTERNAL_LINK;
   content: string;
   url: string;
   description?: string;
   abbrev?: string; // [[url:abbrev][description]]
 }
 
-export interface InnerLinkNode extends Node {
-  type: NodeTypes.INNER_LINK;
+export interface OrgInnerLinkNode extends OrgNode {
+  type: OrgNodeTypes.INNER_LINK;
   content: string;
   id: string;
 }
 
-export interface BlockNode extends Node {
-  type: NodeTypes.BLOCK | NodeTypes.TEXT_BLOCK;
+export interface OrgBlockNode extends OrgNode {
+  type: OrgNodeTypes.BLOCK | OrgNodeTypes.TEXT_BLOCK;
   name: string;
   language: string;
   content: string;
-  code: TextNode | string;
+  code: OrgTextNode | string;
   indent: number;
-  attributes: Array<Attribute>;
-  options: BlockOptions;
+  attributes: Array<OrgAttribute>;
+  options: OrgBlockOptions;
 }
 
-export type BlockOptions = Array<Attribute>;
+export type OrgBlockOptions = Array<OrgAttribute>;
 
-export const enum DoStatus {
+export const enum OrgDoStatus {
   DONE,
   DOING,
   WAITING,
   CANCELLED,
   SCHEDULED,
 }
-export interface ListNode extends Node {
-  type: NodeTypes.LIST;
+export interface OrgListNode extends OrgNode {
+  type: OrgNodeTypes.LIST;
   content: string;
   isOrder: boolean;
-  state: ListItemState;
+  state: OrgListItemState;
   tag: string;
 }
 
-export const inlineTagList = ['=', '+', '_', '/', '~', '*', '$'];
+export const inlineTaOrgist = ['=', '+', '_', '/', '~', '*', '$'];
 export type InlineTag = '=' | '+' | '_' | '/' | '~' | '*' | '$';
 export const textBlockNames = ['example', 'textbox']; // non-src blocks name
 
-export interface EmphasisNode extends Node {
-  type: NodeTypes.EMPHASIS;
+export interface OrgEmphasisNode extends OrgNode {
+  type: OrgNodeTypes.EMPHASIS;
   tag: InlineTag;
-  children: EmphasisNode[];
+  children: OrgEmphasisNode[];
 }
 
 export type ValidContentNode =
-  | TextNode
-  | ExternalLinkNode
-  | InnerLinkNode
-  | EmphasisNode;
+  | OrgTextNode
+  | OrgExternalLinkNode
+  | OrgInnerLinkNode
+  | OrgEmphasisNode;
 
 export const propertyRE = /^(\s*)#\+(?!begin|end)([\w-_]+)\s*:(.*)$/i;
 export const headerRE = /^(\*+)\s+(.*)$/i;
@@ -157,12 +158,12 @@ export const emphasisRE =
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 
-const states: Array<StateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
+const states: Array<OrgStateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
 
 export function baseParse(
   source: string,
-  options: ParserOptions = {
+  options: OrgParserOptions = {
     onError: (error: Error) => console.warn(error),
   }
 ) {
@@ -206,7 +207,7 @@ export function parseNode(content: string, list: string[], index: number) {
   return node;
 }
 
-export declare type ListItemState = ' ' | '-' | 'x'
+export declare type OrgListItemState = ' ' | '-' | 'x'
 export function parseList(
   content: string,
   index: number,
@@ -240,7 +241,7 @@ export function parseBlock(
   content: string,
   index: number,
   list: string[]
-): BlockNode | null {
+): OrgBlockNode | null {
   const matched = blockBeginRE.exec(content);
 
   if (matched == null) {
@@ -264,7 +265,7 @@ export function parseBlock(
   let attr = matched[4] || '';
   // find the first `:` index
   let optionEndIndex = attr.indexOf(':');
-  let options = [] as BlockOptions,
+  let options = [] as OrgBlockOptions,
     optionString = '';
 
   // FIX: #+begin_src emacs-lisp -n -r, without attributes
@@ -275,13 +276,13 @@ export function parseBlock(
   if (optionEndIndex > 0) {
     optionString = attr.slice(0, optionEndIndex);
     attr = attr.slice(optionEndIndex);
-    options = (parseCLIOption(optionString) || []) as BlockOptions;
+    options = (parseCLIOption(optionString) || []) as OrgBlockOptions;
   }
 
   const language = (matched[3] || '').trim();
   const name = (matched[2] || '').trim();
   const node = {
-    type: NodeTypes.BLOCK,
+    type: OrgNodeTypes.BLOCK,
     name,
     language,
     content,
@@ -303,21 +304,21 @@ export function parseBlock(
       : [],
     options,
     index,
-  } as BlockNode;
+  } as OrgBlockNode;
 
   // remove code from original list
   list.splice(index + 1, i - index);
 
   // pure text blocks, eg. example, textbox
   if (textBlockNames.indexOf(node.name) > -1) {
-    node.type = NodeTypes.TEXT_BLOCK;
+    node.type = OrgNodeTypes.TEXT_BLOCK;
     node.code = parseText(node.code as string, index);
   }
 
-  return node as BlockNode;
+  return node as OrgBlockNode;
 }
 
-function parseCLIOption(str: string): BlockOptions {
+function parseCLIOption(str: string): OrgBlockOptions {
   // add space word
   str = ` ${str} `;
 
@@ -337,7 +338,7 @@ export function parseHeader(
   source: string,
   index: number,
   list: string[]
-): HeaderNode | null {
+): OrgHeaderNode | null {
   const { content, tags } = parseTags(source);
 
   const matched = content.match(headerRE);
@@ -348,7 +349,7 @@ export function parseHeader(
 
   const [, stars, title] = matched;
 
-  const properties: Array<PairNode<string | Timestamp>> = [];
+  const properties: Array<OrgPairNode<string | OrgTimestamp>> = [];
   // find deadline & properties
   for (let i = index + 1; i < list.length; i++) {
     const next = list[i];
@@ -395,7 +396,7 @@ export function parseHeader(
   }
 
   return {
-    type: NodeTypes.HEADER,
+    type: OrgNodeTypes.HEADER,
     content: parseText(title, index), // title contains special node
     title,
     index,
@@ -409,12 +410,12 @@ export function parseHeader(
 export function parseProperty(
   content: string,
   index: number
-): PropertyNode | null {
+): OrgPropertyNode | null {
   const matched = content.match(propertyRE);
   if (matched) {
     const [content, indent, name, value] = matched || [];
     return {
-      type: NodeTypes.PROPERTY,
+      type: OrgNodeTypes.PROPERTY,
       content,
       indent: (indent || '').length,
       name,
@@ -427,20 +428,20 @@ export function parseProperty(
 }
 
 // 解析文本
-export function parseText(content: string, index: number): TextNode {
+export function parseText(content: string, index: number): OrgTextNode {
   const matched = content.match(/^(\s+)/);
   let indent = 0;
   if (matched) {
     indent = matched[1].length;
   }
 
-  const node: TextNode = {
-    type: NodeTypes.TEXT,
+  const node: OrgTextNode = {
+    type: OrgNodeTypes.TEXT,
     content: content.trim(),
     children: [
       {
         // foreach to handle more special text node
-        type: NodeTypes.TEXT,
+        type: OrgNodeTypes.TEXT,
         content: content.trim(),
         indent,
         index,
@@ -469,21 +470,21 @@ export function parseText(content: string, index: number): TextNode {
   return node;
 }
 
-export function parseEmphasisText(node: TextNode) {
+export function parseEmphasisText(node: OrgTextNode) {
   parseTextExtra(node, emphasisRE, (values: string[]) => {
     const [sign, matchValue] = values;
-    return { type: NodeTypes.EMPHASIS, tag: sign, content: matchValue };
+    return { type: OrgNodeTypes.EMPHASIS, tag: sign, content: matchValue };
   });
 }
 
-export function parseTimestamp(node: TextNode) {
+export function parseTimestamp(node: OrgTextNode) {
   parseTextExtra(node, timestampRE, (values: string[]) => {
-    const timestamp: Timestamp = matchTimestamp(values[0]);
-    return { timestamp, type: NodeTypes.TIMESTAMP };
+    const timestamp: OrgTimestamp = matchTimestamp(values[0]);
+    return { timestamp, type: OrgNodeTypes.TIMESTAMP };
   });
 }
 
-export function parseExternalLink(node: TextNode) {
+export function parseExternalLink(node: OrgTextNode) {
   parseTextExtra(node, extLinkRE, (values: string[]) => {
     const [url, description] = values;
     const trimUrl = url.trim();
@@ -493,19 +494,19 @@ export function parseExternalLink(node: TextNode) {
     if (match) {
       abbrev = match[1] || '';
     }
-    return { type: NodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev };
+    return { type: OrgNodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev };
   });
 }
 
-export function parseInnerLink(node: TextNode) {
+export function parseInnerLink(node: OrgTextNode) {
   parseTextExtra(node, innerLinkRE, (values: string[]) => {
-    return { type: NodeTypes.INNER_LINK, url: values[0] };
+    return { type: OrgNodeTypes.INNER_LINK, url: values[0] };
   });
 }
 
-export function parseStateKeywords(node: TextNode) {
+export function parseStateKeywords(node: OrgTextNode) {
   parseTextExtra(node, stateRE, (values: string[]) => {
-    return { type: NodeTypes.STATE, content: values[0] };
+    return { type: OrgNodeTypes.STATE, content: values[0] };
   });
 }
 
@@ -531,7 +532,7 @@ function parseTags(content: string): {
   };
 }
 
-export function matchTimestamp(timestamp: string): Timestamp {
+export function matchTimestamp(timestamp: string): OrgTimestamp {
   const re =
     /((?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})|(?<week>\w{3})|(?<time>\d{2}:\d{2}(-\d{2}:\d{2})?)|(?<dein>[-+]\d+[wydm]))/gi;
 
@@ -545,7 +546,7 @@ export function matchTimestamp(timestamp: string): Timestamp {
     }
   }
 
-  return result as Timestamp;
+  return result as OrgTimestamp;
 }
 
 export function extractHeaderProperties(nodes: any) {
@@ -553,7 +554,7 @@ export function extractHeaderProperties(nodes: any) {
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    if (node.type === NodeTypes.HEADER) {
+    if (node.type === OrgNodeTypes.HEADER) {
       // TODO
     }
   }
@@ -571,7 +572,7 @@ function findIndex(
 
 // parse something in text node
 function parseTextExtra(
-  node: TextNode,
+  node: OrgTextNode,
   re: RegExp,
   parser: (val: string[]) => any
 ) {
@@ -581,13 +582,13 @@ function parseTextExtra(
     let cursor = 0,
       result;
     const source = child.content;
-    if (child.type === NodeTypes.TEXT && source) {
+    if (child.type === OrgNodeTypes.TEXT && source) {
       while ((result = re.exec(source))) {
         const [matchText, ...values] = result;
         const pureText = source.slice(cursor, result.index);
         // left text node
         children.push({
-          type: NodeTypes.TEXT,
+          type: OrgNodeTypes.TEXT,
           content: pureText,
         });
 
@@ -608,7 +609,7 @@ function parseTextExtra(
       if (source) {
         // right text node
         children.push({
-          type: NodeTypes.TEXT,
+          type: OrgNodeTypes.TEXT,
           content: source.slice(cursor),
         });
       }
