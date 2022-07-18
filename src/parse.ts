@@ -121,7 +121,7 @@ export interface ListNode extends Node {
   type: NodeTypes.LIST;
   content: string;
   isOrder: boolean;
-  status: DoStatus;
+  state: ListItemState;
   tag: string;
 }
 
@@ -206,6 +206,7 @@ export function parseNode(content: string, list: string[], index: number) {
   return node;
 }
 
+export declare type ListItemState = ' ' | '-' | 'x'
 export function parseList(
   content: string,
   index: number,

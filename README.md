@@ -98,7 +98,7 @@
 
     This will only support `#+LINK: abrrev https://....`, do not support **Emacs Lisp** variables.
 
-* [ ] TODO, DONE, etc. keywords
+* [x] TODO, DONE, etc. keywords
 
 * [ ] Table
 
