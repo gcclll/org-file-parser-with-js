@@ -154,7 +154,7 @@ export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
-  /([=~\+_/\$]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
+  /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 
@@ -598,8 +598,8 @@ function parseTextExtra(
         if (current) {
           children.push({
             ...child,
-            ...current,
             content: matchText,
+            ...current,
           });
         }
 
