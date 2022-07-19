@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2022-07-19
+
+### Bugs
+
+- content do not include sign [#25105e7](https://github.com/gcclll/org-file-parser-with-js/commit/9a8c1892f1e8bb4f5542aa0dc928187ac25105e7)
+
 ## 2022-06-30
 
 ### Bugs
@@ -44,7 +50,7 @@
 
 * [x] [Images](https://orgmode.org/manual/Images.html)
 
-* [ ] Subscripts and Superscripts
+* [x] Subscripts and Superscripts
 
 * [ ] Unordered lists, `-, +, * `
 
@@ -426,6 +432,25 @@ export function parseNode(content: string, list: string[], index: number): Block
 
 used to parse the list read from xx.org file line by line.
 
+### parseList()
+
+```typescript
+export const enum OrgDoStatus {
+  DONE,
+  DOING,
+  WAITING,
+  CANCELLED,
+  SCHEDULED,
+}
+export interface OrgListNode extends OrgNode {
+  type: OrgNodeTypes.LIST;
+  content: string;
+  isOrder: boolean;
+  state: OrgListItemState;
+  tag: string;
+}
+```
+
 ### parseBlock()
 
 ```typescript
@@ -507,6 +532,33 @@ They will be append to `node.children[...Node]`
 
 So, you can parse the `node.children` and concat the parsed ast result to show the whole paragraph text.
 
+### parseSubSupText()
+
+```typescript
+export const SIGN_SUB = '_'
+export const SIGN_SUP = '^'
+export interface OrgSubSupNode extends OrgNode {
+  type: OrgNodeTypes.SUBSUP;
+  sign: '_' | '^';
+  target: string;
+  sub?: string;
+  sup?: string;
+}
+
+```
+
+### parseEmphasisText()
+
+```typescript
+export function parseEmphasisText(parent: TextNode): TextNode
+```
+
+parse the built-in emphasis or [extra special](https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) texts.
+
+Built-in: `~~, $$, ==, **`
+
+Extra: `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
+
 ### parseTimestamp()
 
 ```typescript
@@ -534,17 +586,11 @@ interface Timestamp {
 
 This also supports time scope, like `<2022-12-02 Wed 12:00-14:00 +1w>`
 
-### parseEmphasisText()
+### parseExternalLink()
 
-```typescript
-export function parseEmphasisText(parent: TextNode): TextNode
-```
+### parseInnerLink()
 
-parse the built-in emphasis or [extra special](https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) texts.
-
-Built-in: `~~, $$, ==, **`
-
-Extra: `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
+### parseStateKeywords()
 
 ### parseTags()
 
@@ -557,6 +603,8 @@ function parseTags(content: string): {
 
 parse the tags behind the header. Format: `:tag1:tag2:tag3:` will be parsed to an string array `['tag1', 'tag2', 'tag3']`
 
+## parseTextExtra()
+
 ## Utilities
 
 ### matchTimestamp()
@@ -565,3 +613,6 @@ parse the tags behind the header. Format: `:tag1:tag2:tag3:` will be parsed to a
 export function matchTimestamp(timestamp: string): Timestamp
 ```
 
+## extractHeaderProperties()
+
+## findIndex()

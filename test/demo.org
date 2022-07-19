@@ -29,7 +29,9 @@ test box
 
 #+end_textbox
 
-* TODO header1 :tag1:tag2:
+suptext^sup xxxx text subtext_sub jjjjkkkj
+
+* TODO header1^sup  xx_sub :tag1:tag2:
 DEADLINE: <2022-07-06 Wed>
 :PROPERTIES:
 :STYLE: .test{color:red}

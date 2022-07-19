@@ -21,6 +21,8 @@ export const enum OrgNodeTypes {
   INNER_LINK, // <<meta_id>>
 
   STATE, // TODO, DONE, etc.
+
+  SUBSUP, // 下标或上标
 }
 
 
@@ -67,6 +69,16 @@ export interface OrgTimestampNode extends OrgNode {
   type: OrgNodeTypes.TIMESTAMP;
   timestamp: OrgTimestamp;
   value: string;
+}
+
+export const SIGN_SUB = '_'
+export const SIGN_SUP = '^'
+export interface OrgSubSupNode extends OrgNode {
+  type: OrgNodeTypes.SUBSUP;
+  sign: '_' | '^';
+  target: string;
+  sub?: string;
+  sup?: string;
 }
 
 export interface OrgPropertyNode extends OrgNode {
@@ -157,6 +169,7 @@ export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
+export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi
 
 const states: Array<OrgStateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
@@ -465,9 +478,25 @@ export function parseText(content: string, index: number): OrgTextNode {
 
   // 5. parse state keywords(eg. TODO, DONE, CANCELLED)
   parseStateKeywords(node);
+  
+  // 6. parse sub or sup text
+  parseSubSupText(node)
 
   // 将内容解析成 children，content 置空
   return node;
+}
+
+export function parseSubSupText(node: OrgTextNode) {
+  parseTextExtra(node, subSupRE, (values: string[]) => {
+    const [target, sign, text] = values
+    const o = { target, sign, type: OrgNodeTypes.SUBSUP } as OrgSubSupNode
+    if (sign === SIGN_SUB) {
+      o.sub = text
+    } else {
+      o.sup = text
+    }
+    return o
+  })
 }
 
 export function parseEmphasisText(node: OrgTextNode) {
