@@ -33,7 +33,7 @@
   },
   "name": "org-file-parser-with-js",
   "author": "gcclll",
-  "module": "dist/org-file-parser-with-js.esm.js",
+  "module": "src/index.ts",
   "size-limit": [
     {
       "path": "dist/org-file-parser-with-js.cjs.production.min.js",

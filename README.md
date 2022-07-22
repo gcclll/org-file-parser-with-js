@@ -618,3 +618,13 @@ export function matchTimestamp(timestamp: string): Timestamp
 ## extractHeaderProperties()
 
 ## findIndex()
+
+# Other
+
+```json
+// package.json
+{
+	"module": "dist/org-file-parser-with-js.esm.js",
+}
+```
+
