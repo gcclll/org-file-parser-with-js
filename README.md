@@ -52,9 +52,11 @@
 
 * [x] Subscripts and Superscripts
 
-* [ ] Unordered lists, `-, +, * `
+* [ ] List
 
-* [ ] Ordered lists, `1. 1)`
+  * [x] Unordered lists, `-, +, * `
+  * [x] Ordered lists, `1. 1)`
+  * [ ] List children parsing
 
 * [x] Blocks, `#+begin_xxx ... #end_xxx`
 

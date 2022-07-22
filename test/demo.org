@@ -15,6 +15,17 @@ keywords: TODO, DONE, CANCELLED, ???
 
 link with abbrev: [[d.png:d-img][description]] ???
 
+Orderless List:
+
+- orderless list item 1
+- orderless list item 2
+
+Order List:
+
+1. order list item 1
+2. order list item 2
+
+
 #+begin_textbox
 test box
 
@@ -36,5 +47,3 @@ DEADLINE: <2022-07-06 Wed>
 :PROPERTIES:
 :STYLE: .test{color:red}
 :END:
-
-

@@ -1,5 +1,6 @@
 export const isArray = Array.isArray;
 
+// {{ Type Definitions
 export interface OrgParserOptions {
   onError: (error: Error) => void;
 }
@@ -24,7 +25,6 @@ export const enum OrgNodeTypes {
 
   SUBSUP, // 下标或上标
 }
-
 
 export interface OrgRootNode {
   metas: OrgAttribute[]; // 页面头部所有属性
@@ -71,8 +71,8 @@ export interface OrgTimestampNode extends OrgNode {
   value: string;
 }
 
-export const SIGN_SUB = '_'
-export const SIGN_SUP = '^'
+export const SIGN_SUB = '_';
+export const SIGN_SUP = '^';
 export interface OrgSubSupNode extends OrgNode {
   type: OrgNodeTypes.SUBSUP;
   sign: '_' | '^';
@@ -153,7 +153,9 @@ export type ValidContentNode =
   | OrgExternalLinkNode
   | OrgInnerLinkNode
   | OrgEmphasisNode;
+// }}
 
+// {{ RegExp Definitions
 export const propertyRE = /^(\s*)#\+(?!begin|end)([\w-_]+)\s*:(.*)$/i;
 export const headerRE = /^(\*+)\s+(.*)$/i;
 export const blockRE =
@@ -161,18 +163,19 @@ export const blockRE =
 export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)(\s+[\w-]+)?(\s+.*)?/;
 export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
 export const blockOptionsRE = /-(\w)\s([^-]+)?/gi;
-export const unorderListRE = /^(\s*)(?:-|\+|\s\*)\s+(\[[-x ]\]\s+)?(.*)$/;
-export const orderListRE = /^(\s*)(?:\d+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
+export const unorderListRE = /^(\s*)(-|\+|\s+\*)\s+(\[[-x ]\]\s+)?(.*)$/;
+export const orderListRE = /^(\s*)([\d\w]+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
-export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi
+export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi;
 
 const states: Array<OrgStateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
+// }}
 
 export function baseParse(
   source: string,
@@ -193,6 +196,8 @@ export function baseParse(
       nodes.push(node);
     }
   }
+
+  // TODO 1. to find list children
 
   // filter the empty string node
   return nodes.filter((node: any) => node && node.content !== '');
@@ -220,33 +225,27 @@ export function parseNode(content: string, list: string[], index: number) {
   return node;
 }
 
-export declare type OrgListItemState = ' ' | '-' | 'x'
+export declare type OrgListItemState = ' ' | '-' | 'x';
 export function parseList(
   content: string,
   index: number,
-  list: string[],
+  _: string[],
   isOrder: boolean
 ) {
-  const re = isOrder ? orderListRE : unorderListRE
-  const [, indent, tag, state, contentText] = re.exec(content) || []
-  
-  let children: Array<any> = [] // find children by indent level bigger then current list item
+  const re = isOrder ? orderListRE : unorderListRE;
+  const [, indent = '', tag = '', state = '', contentText = ''] =
+    re.exec(content) || [];
 
-  for (let i = index + 1; i < list.length; i++) {
-    const node = list[i]
-    if (unorderListRE.test(node) || orderListRE.test(node) || headerRE.test(node)) {
-      break
-    }
-  }
-  
+  // parse content directly
   return {
+    type: OrgNodeTypes.LIST,
     content: parseText(contentText, index),
-    children,
+    children: [],
     tag: tag.trim(),
     state: state.trim().replace(/^\[|\]$/, ''), // ' ', '-', 'x'
     isOrder,
     index,
-    indent: indent.length
+    indent: indent.length,
   };
 }
 
@@ -478,9 +477,9 @@ export function parseText(content: string, index: number): OrgTextNode {
 
   // 5. parse state keywords(eg. TODO, DONE, CANCELLED)
   parseStateKeywords(node);
-  
+
   // 6. parse sub or sup text
-  parseSubSupText(node)
+  parseSubSupText(node);
 
   // 将内容解析成 children，content 置空
   return node;
@@ -488,15 +487,15 @@ export function parseText(content: string, index: number): OrgTextNode {
 
 export function parseSubSupText(node: OrgTextNode) {
   parseTextExtra(node, subSupRE, (values: string[]) => {
-    const [target, sign, text] = values
-    const o = { target, sign, type: OrgNodeTypes.SUBSUP } as OrgSubSupNode
+    const [target, sign, text] = values;
+    const o = { target, sign, type: OrgNodeTypes.SUBSUP } as OrgSubSupNode;
     if (sign === SIGN_SUB) {
-      o.sub = text
+      o.sub = text;
     } else {
-      o.sup = text
+      o.sup = text;
     }
-    return o
-  })
+    return o;
+  });
 }
 
 export function parseEmphasisText(node: OrgTextNode) {
@@ -523,7 +522,12 @@ export function parseExternalLink(node: OrgTextNode) {
     if (match) {
       abbrev = match[1] || '';
     }
-    return { type: OrgNodeTypes.EXTERNAL_LINK, url: trimUrl, description, abbrev };
+    return {
+      type: OrgNodeTypes.EXTERNAL_LINK,
+      url: trimUrl,
+      description,
+      abbrev,
+    };
   });
 }
 
