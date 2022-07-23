@@ -24,6 +24,7 @@ export const enum OrgNodeTypes {
   STATE, // TODO, DONE, etc.
 
   SUBSUP, // 下标或上标
+  COLORFUL_TEXT, // 带颜色的文本
 }
 
 export interface OrgRootNode {
@@ -55,6 +56,12 @@ export interface OrgPairNode<T> {
 export interface OrgFootNode extends OrgPairNode<string> {}
 export interface OrgTextNode extends OrgNode {
   type: OrgNodeTypes.TEXT;
+}
+
+export interface OrgColorfulTextNode extends OrgNode {
+  type: OrgNodeTypes.COLORFUL_TEXT;
+  name: string; // color name
+  content: string | OrgTextNode;
 }
 
 interface OrgTimestamp {
@@ -172,6 +179,16 @@ export const emphasisRE =
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi;
+
+const colorNameREStr = `\\w+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
+export const colorfulTextRE = new RegExp(
+  `<(${colorNameREStr}):([^<>]+)>`,
+  'gi'
+);
+export const colorfulBareTextRE = new RegExp(
+  `\\s+(${colorNameREStr}):([^\\s]+)\\s+`,
+  'gi'
+);
 
 const states: Array<OrgStateNode['content']> = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
@@ -481,8 +498,38 @@ export function parseText(content: string, index: number): OrgTextNode {
   // 6. parse sub or sup text
   parseSubSupText(node);
 
+  // 7. parse colorful text
+  parseColorfulText(node);
+
+  // 8. parse colorful bare text
+  parseColorfulBareText(node);
+
   // 将内容解析成 children，content 置空
   return node;
+}
+
+// <red:xxx yyy>
+export function parseColorfulText(node: OrgTextNode) {
+  parseTextExtra(node, colorfulTextRE, (values: string[]) => {
+    const [name, text] = values;
+    return {
+      type: OrgNodeTypes.COLORFUL_TEXT,
+      name,
+      content: text, //parseText(text, 0),
+    };
+  });
+}
+
+// red:xxxx
+export function parseColorfulBareText(node: OrgTextNode) {
+  parseTextExtra(node, colorfulBareTextRE, (values: string[]) => {
+    const [name, text] = values;
+    return {
+      type: OrgNodeTypes.COLORFUL_TEXT,
+      name,
+      content: text, //parseText(text, 0),
+    };
+  });
 }
 
 export function parseSubSupText(node: OrgTextNode) {
@@ -615,6 +662,7 @@ function parseTextExtra(
     let cursor = 0,
       result;
     const source = child.content;
+
     if (child.type === OrgNodeTypes.TEXT && source) {
       while ((result = re.exec(source))) {
         const [matchText, ...values] = result;

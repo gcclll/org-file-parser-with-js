@@ -38,7 +38,10 @@
     }
     ```
 
-    
+* [x] Text
+
+  * [x] Colorful text, `<red:text1 text2>` or `red:text1text2`
+    * [ ] TODO Support emphasis text, `<red:text1 _text2_>`
 
 * [x] Attribute, `#+title: org-file-parser-with-js`
 
