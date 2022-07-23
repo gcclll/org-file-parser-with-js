@@ -1,7 +1,9 @@
 {
   "version": "0.1.19",
   "license": "MIT",
+  "type": "module",
   "main": "dist/index.js",
+  "module": "src/index.ts",
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
@@ -33,7 +35,6 @@
   },
   "name": "org-file-parser-with-js",
   "author": "gcclll",
-  "module": "src/index.ts",
   "size-limit": [
     {
       "path": "dist/org-file-parser-with-js.cjs.production.min.js",
