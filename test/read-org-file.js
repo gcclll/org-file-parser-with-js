@@ -12,7 +12,7 @@ fs.readFile('./demo.org', (err, data) => {
     const nodes = baseParse(context);
 
     fs.writeFile(
-      process.env.HOME + '/tmp/org.js',
+      './org.js',
       `window.$json=${JSON.stringify(nodes)}`,
       (err) => {
         console.log('write error', err);

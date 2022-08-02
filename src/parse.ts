@@ -34,6 +34,7 @@ export interface OrgRootNode {
   children: OrgValidNode[];
   properties?: OrgAttribute[]; // 页面属性，如：$+title: title value
   footnotes?: OrgFootNode[];
+  options?: OrgParserOptions
 }
 
 export type OrgTextChildNode =
@@ -203,7 +204,6 @@ export function baseParse(
 ): OrgRootNode {
   // 按行分析，因为 file.org 文档中主要是按照行来区分文章内容的。
   const list = source.split(/\n+/);
-  console.log(options);
 
   let nodes: OrgValidNode[] = [];
 
@@ -216,9 +216,10 @@ export function baseParse(
 
   return {
     type: OrgNodeTypes.ROOT,
-    children: [],
+    children: nodes,
     properties: [],
     footnotes: [],
+    options
   };
 }
 
@@ -466,10 +467,10 @@ function parseBlock(
 
   const node: OrgBlockNode = {
     type: OrgNodeTypes.BLOCK,
-    indent: matched[1].length,
-    name: matched[2].trim(),
+    indent: (matched[1] || '').length,
+    name: (matched[2] || '').trim(),
     code: list.slice(index + 1, i).join('\n'),
-    lang: matched[3].trim(),
+    lang: (matched[3] || '').trim(),
     attributes,
     options,
   };

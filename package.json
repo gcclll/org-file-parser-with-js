@@ -1,7 +1,6 @@
 {
   "version": "0.1.21",
   "license": "MIT",
-  "type": "module",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "typings": "dist/index.d.ts",
