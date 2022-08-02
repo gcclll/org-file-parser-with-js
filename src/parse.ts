@@ -171,7 +171,7 @@ export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
 export const blockOptionsRE = /-(\w)\s([^-]+)?/gi;
 export const unorderListRE = /^(\s*)(-|\+|\s+\*)\s+(\[[-x ]\]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)([\d\w]+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
-export const extLinkRE = /\[\[([^[\]]+)](\[([^[\]]+)])?\]/g;
+export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
 export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
