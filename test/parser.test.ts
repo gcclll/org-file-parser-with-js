@@ -1,5 +1,5 @@
 
-import { baseParse as parse } from '../dist/'
+// import { baseParse as parse } from '../dist/'
 
 describe('parser', () => {
   it('header', () => {
