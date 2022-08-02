@@ -210,9 +210,7 @@ export function baseParse(
     }
   }
 
-  nodes = nodes.filter(
-    (node: OrgValidNode) => node && (node.content || node.children!.length)
-  );
+  nodes = nodes.filter((node: OrgValidNode) => node && node.content !== '');
 
   return {
     type: OrgNodeTypes.ROOT,
