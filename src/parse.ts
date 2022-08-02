@@ -34,7 +34,7 @@ export interface OrgRootNode {
   children: OrgValidNode[];
   properties?: OrgAttribute[]; // 页面属性，如：$+title: title value
   footnotes?: OrgFootNode[];
-  options?: OrgParserOptions
+  options?: OrgParserOptions;
 }
 
 export type OrgTextChildNode =
@@ -57,6 +57,7 @@ export type OrgValidNode =
 export interface OrgBaseNode {
   indent?: number;
   content?: string | OrgTextChildNode;
+  children?: OrgTextChildNode[];
 }
 
 export interface OrgStateNode extends OrgBaseNode {
@@ -64,7 +65,7 @@ export interface OrgStateNode extends OrgBaseNode {
   state: OrgStates;
 }
 
-export interface OrgPairNode<T> {
+export interface OrgPairNode<T> extends OrgBaseNode {
   name: string;
   value: T;
 }
@@ -73,14 +74,11 @@ export interface OrgFootNode extends OrgPairNode<string> {}
 
 export interface OrgTextNode extends OrgBaseNode {
   type: OrgNodeTypes.TEXT;
-  content: string | OrgTextChildNode;
-  children: OrgTextChildNode[];
 }
 
 export interface OrgColorfulTextNode extends OrgBaseNode {
   type: OrgNodeTypes.COLORFUL_TEXT;
   color: string;
-  content: OrgTextChildNode;
 }
 
 export interface OrgTimestamp {
@@ -141,10 +139,8 @@ export declare type OrgListItemState = ' ' | '-' | 'x' | 'X';
 export interface OrgListNode extends OrgBaseNode {
   type: OrgNodeTypes.LIST;
   name: string; // 无序：-/+, 有序：1)/a)/1./a.
-  content: OrgTextNode;
   isOrder: boolean; // 有序列表/无序列表
   state: OrgListItemState;
-  children: OrgValidNode[];
 }
 
 export const enum InlineEmphasisSign {
@@ -214,12 +210,16 @@ export function baseParse(
     }
   }
 
+  nodes = nodes.filter(
+    (node: OrgValidNode) => node && (node.content || node.children!.length)
+  );
+
   return {
     type: OrgNodeTypes.ROOT,
     children: nodes,
     properties: [],
     footnotes: [],
-    options
+    options,
   };
 }
 
@@ -635,6 +635,21 @@ function parseTextExtra(
   parser: (val: string[]) => OrgTextChildNode
 ): OrgTextChildNode {
   const children: OrgTextChildNode[] = [];
+
+  const count = node.children!.length;
+  if (count === 0) {
+    if (typeof node.content === 'string') {
+      node.children = [
+        {
+          type: OrgNodeTypes.TEXT,
+          content: node.content,
+          children: [],
+        },
+      ];
+    } else if (typeof node.content === 'object') {
+      node.children = [{ ...node.content }];
+    }
+  }
 
   node.children!.forEach((child: OrgTextChildNode) => {
     let cursor = 0,
