@@ -1,1 +1,1 @@
-export * from './parse'
+export * from './parseV2'
