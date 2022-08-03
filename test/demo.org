@@ -3,6 +3,12 @@
 #+email: gccll.love@gmail.com
 
 
+
+| name | value |
+|------+-------|
+| xx   | yy    |
+| al   | bb    |
+
 I'am test test!!!!
 
 <2022-02-12 18:00 Wed +1d> test <2033-03-13 22:00> test !!xxx!!

@@ -115,6 +115,27 @@ LIVE DEMO: https://cheng92.com/demo/org
 
 * [ ] Table
 
+  * [x] Base table
+
+    ```org
+    | name | value |
+    |------+-------|
+    | xxx  | yyy   |
+    
+    // => 
+    {
+      type: OrgNodeTypes.TABLE,
+      nodes: [
+        ['name', 'value'],
+        ['xxx', 'yyy']
+      ],
+      ...
+    }
+    ```
+
+    
+
+
 # Usage
 
 **Installation**:
@@ -157,234 +178,168 @@ Header2-1 content 2
 Header2-1 content 3
 
 * emphasis node
-
-Functions =inserting= links (~see~ Handling +Links+) properly escape ambiguous characters. You only need to bother about the rules above when inserting directly, or yanking, a URI within square brackets. When in doubt, you may use the function org-link-escape, ~which~ turns a +link+ string /into/ its _escaped_ form.
-
-Once a link in the buffer is complete, with all brackets present, Org changes the display so that ‘DESCRIPTION’ is displayed instead of ‘[[LINK][DESCRIPTION]]’ and ‘LINK’ is displayed instead of ‘[[LINK]]’. Links are highlighted in the org-link face, which, by default, is an underlined face.
 ```
 
 Result Example JSON:
 
 ```json
-[
-    {
-        "type": 2,
-        "content": "#+title: test",
-        "indent": 0,
-        "name": "title",
-        "value": " test",
-        "index": 0
-    },
-    {
-        "type": 2,
-        "content": "#+author: gcclll",
-        "indent": 0,
-        "name": "author",
-        "value": " gcclll",
-        "index": 1
-    },
-    {
-        "type": 2,
-        "content": "#+email: gccll.love@gmail.com",
-        "indent": 0,
-        "name": "email",
-        "value": " gccll.love@gmail.com",
-        "index": 2
-    },
-    {
-        "type": 1,
-        "content": "I'am test test!!!!",
-        "children": [
-            {
+{
+    "type": 0,
+    "children": [
+        {
+            "type": 2,
+            "name": "title",
+            "value": "test"
+        },
+        {
+            "type": 2,
+            "name": "author",
+            "value": "gcclll"
+        },
+        {
+            "type": 2,
+            "name": "email",
+            "value": "gccll.love@gmail.com"
+        },
+        {
+            "type": 1,
+            "content": "I'am test test!!!!",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": "I'am test test!!!!",
+                    "indent": 0,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": 3,
+            "title": {
                 "type": 1,
-                "content": "I'am test test!!!!"
-            }
-        ],
-        "indent": 0,
-        "index": 3
-    },
-    {
-        "type": 3,
-        "content": "* header1-1 ",
-        "title": "header1-1 ",
-        "index": 4,
-        "indent": 0,
-        "tags": [
-            "test",
-            "bbb",
-            "ccc"
-        ],
-        "level": 1
-    },
-    {
-        "type": 1,
-        "content": "header1 content",
-        "children": [
-            {
+                "content": "header1-1",
+                "indent": 0,
+                "children": [
+                    {
+                        "type": 1,
+                        "content": "header1-1",
+                        "indent": 0,
+                        "children": []
+                    }
+                ]
+            },
+            "indent": 0,
+            "level": 1,
+            "properties": [],
+            "tags": [
+                "test",
+                "bbb",
+                "ccc"
+            ]
+        },
+        {
+            "type": 1,
+            "content": "header1 content",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": "header1 content",
+                    "indent": 0,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": 3,
+            "title": {
                 "type": 1,
-                "content": "header1 content"
-            }
-        ],
-        "indent": 0,
-        "index": 5
-    },
-    {
-        "type": 3,
-        "content": "** header2-1",
-        "title": "header2-1",
-        "index": 6,
-        "indent": 0,
-        "tags": [],
-        "level": 2
-    },
-    {
-        "type": 1,
-        "content": "Header2-1 content 1",
-        "children": [
-            {
+                "content": "header2-1",
+                "indent": 0,
+                "children": [
+                    {
+                        "type": 1,
+                        "content": "header2-1",
+                        "indent": 0,
+                        "children": []
+                    }
+                ]
+            },
+            "indent": 0,
+            "level": 2,
+            "properties": [],
+            "tags": []
+        },
+        {
+            "type": 1,
+            "content": "Header2-1 content 1",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": "Header2-1 content 1",
+                    "indent": 0,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": 2,
+            "name": "test",
+            "value": "header2 attribute"
+        },
+        {
+            "type": 1,
+            "content": "Header2-1 content 2",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": "Header2-1 content 2",
+                    "indent": 0,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": 1,
+            "content": "Header2-1 content 3",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": "Header2-1 content 3",
+                    "indent": 0,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": 3,
+            "title": {
                 "type": 1,
-                "content": "Header2-1 content 1"
-            }
-        ],
-        "indent": 0,
-        "index": 7
-    },
-    {
-        "type": 2,
-        "content": "#+test: header2 attribute",
-        "indent": 0,
-        "name": "test",
-        "value": " header2 attribute",
-        "index": 8
-    },
-    {
-        "type": 1,
-        "content": "Header2-1 content 2",
-        "children": [
-            {
-                "type": 1,
-                "content": "Header2-1 content 2"
-            }
-        ],
-        "indent": 0,
-        "index": 9
-    },
-    {
-        "type": 1,
-        "content": "Header2-1 content 3",
-        "children": [
-            {
-                "type": 1,
-                "content": "Header2-1 content 3"
-            }
-        ],
-        "indent": 0,
-        "index": 10
-    },
-    {
-        "type": 3,
-        "content": "* emphasis node",
-        "title": "emphasis node",
-        "index": 11,
-        "indent": 0,
-        "tags": [],
-        "level": 1
-    },
-    {
-        "type": 1,
-        "content": "Functions =inserting= links (~see~ Handling +Links+) properly escape ambiguous characters. You only need to bother about the rules above when inserting directly, or yanking, a URI within square brackets. When in doubt, you may use the function org-link-escape, ~which~ turns a +link+ string /into/ its _escaped_ form.",
-        "children": [
-            {
-                "type": 1,
-                "content": "Functions "
+                "content": "emphasis node",
+                "indent": 0,
+                "children": [
+                    {
+                        "type": 1,
+                        "content": "emphasis node",
+                        "indent": 0,
+                        "children": []
+                    }
+                ]
             },
-            {
-                "type": 5,
-                "tag": "=",
-                "content": "inserting"
-            },
-            {
-                "type": 1,
-                "content": " links ("
-            },
-            {
-                "type": 5,
-                "tag": "~",
-                "content": "see"
-            },
-            {
-                "type": 1,
-                "content": " Handling "
-            },
-            {
-                "type": 5,
-                "tag": "+",
-                "content": "Links"
-            },
-            {
-                "type": 1,
-                "content": ") properly escape ambiguous characters. You only need to bother about the rules above when inserting directly, or yanking, a URI within square brackets. When in doubt, you may use the function org-link-escape, "
-            },
-            {
-                "type": 5,
-                "tag": "~",
-                "content": "which"
-            },
-            {
-                "type": 1,
-                "content": " turns a "
-            },
-            {
-                "type": 5,
-                "tag": "+",
-                "content": "link"
-            },
-            {
-                "type": 1,
-                "content": " string "
-            },
-            {
-                "type": 5,
-                "tag": "/",
-                "content": "into"
-            },
-            {
-                "type": 1,
-                "content": " its "
-            },
-            {
-                "type": 5,
-                "tag": "_",
-                "content": "escaped"
-            },
-            {
-                "type": 1,
-                "content": "Functions =inserting= links (~see~ Handling +Links+) properly escape ambiguous characters. You only need to bother about the rules above when inserting directly, or yanking, a URI within square brackets. When in doubt, you may use the function org-link-escape, ~which~ turns a +link+ string /into/ its _escaped_ form."
-            }
-        ],
-        "indent": 0,
-        "index": 12
-    },
-    {
-        "type": 1,
-        "content": "Once a link in the buffer is complete, with all brackets present, Org changes the display so that â€˜DESCRIPTIONâ€™ is displayed instead of â€˜[[LINK][DESCRIPTION]]â€™ and â€˜LINKâ€™ is displayed instead of â€˜[[LINK]]â€™. Links are highlighted in the org-link face, which, by default, is an underlined face.",
-        "children": [
-            {
-                "type": 1,
-                "content": "Once a link in the buffer is complete, with all brackets present, Org changes the display so that â€˜DESCRIPTIONâ€™ is displayed instead of â€˜[[LINK][DESCRIPTION]]â€™ and â€˜LINKâ€™ is displayed instead of â€˜[[LINK]]â€™. Links are highlighted in the org-link face, which, by default, is an underlined face."
-            }
-        ],
-        "indent": 0,
-        "index": 13
-    },
-    {
-        "type": 1,
-        "content": "",
-        "children": [],
-        "indent": 0,
-        "index": 14
-    }
-]
+            "indent": 0,
+            "level": 1,
+            "properties": [],
+            "tags": []
+        }
+    ],
+    "properties": [],
+    "footnotes": [],
+    "options": {}
+}
 ```
 
 # APIs
@@ -428,52 +383,14 @@ usage:
 const ast = baseParse(`
 #+title: test
 ....`/*org file content*/)
-// ast => [{ type, content, ... }, ...]
+// ast => {type: 0 /*root*/, children: [{ ... }] ...}
 ```
 
 ### parseNode()
 
-```typescript
-export function parseNode(content: string, list: string[], index: number): BlockNode | null
-```
-
-used to parse the list read from xx.org file line by line.
-
 ### parseList()
 
-```typescript
-export const enum OrgDoStatus {
-  DONE,
-  DOING,
-  WAITING,
-  CANCELLED,
-  SCHEDULED,
-}
-export interface OrgListNode extends OrgNode {
-  type: OrgNodeTypes.LIST;
-  content: string;
-  isOrder: boolean;
-  state: OrgListItemState;
-  tag: string;
-}
-```
-
 ### parseBlock()
-
-```typescript
-export function parseBlock(
-  content: string,
-  list: string[],
-  index: number
-): BlockNode | null
-```
-
-parse the block node, contains:
-
-```
-#+begin_xxx <language> <properties>
-#+end_xxx
-```
 
 ### parseCLIOption()
 
@@ -494,22 +411,7 @@ parse the cli options, used for `parseBlock()`
 
 ### parseHeader()
 
-```typescript
-export function parseHeader(source: string, index: number): HeaderNode | null
-```
-
-parse the header in org file, eg. `* header level 1`, `** header level 2`
-
 ### parseProperty()
-
-```typescript
-export function parseProperty(
-  content: string,
-  index: number
-): PropertyNode | null
-```
-
-parse the property in whole org file, formt: `$+name: property value`, eg. `#+title: org`
 
 ### parseText()
 

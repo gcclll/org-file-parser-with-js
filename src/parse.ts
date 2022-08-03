@@ -27,6 +27,8 @@ export const enum OrgNodeTypes {
 
   SUB_SUP, // 下标或上标
   COLORFUL_TEXT, // 带颜色的文本
+
+  TABLE, // 表格
 }
 
 export interface OrgRootNode {
@@ -52,12 +54,26 @@ export type OrgValidNode =
   | OrgHeaderNode
   | OrgBlockNode
   | OrgListNode
-  | OrgTextChildNode;
+  | OrgTextChildNode
+  | OrgTableNode;
 
 export interface OrgBaseNode {
   indent?: number;
   content?: string | OrgTextChildNode;
   children?: OrgTextChildNode[];
+}
+
+export type OrgTableRowType = boolean | string[];
+// 第一行必需是表头，用表头的列内容做为对象的 key
+// 如：|name|value|
+//     |cat|100|
+// 结果：[['name', 'value], ['cat', '100']]
+//
+export interface OrgTableNode extends OrgBaseNode {
+  type: OrgNodeTypes.TABLE
+  nodes: OrgTableRowType[];
+  rows: number;
+  name?: string;
 }
 
 export interface OrgStateNode extends OrgBaseNode {
@@ -179,6 +195,10 @@ export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestam
 export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi;
 
+// table regexp
+export const tableRowRE = /^(\s*)\|(.*?)\|$/;
+export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
+
 const colorNameREStr = `\\w+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
 export const colorfulTextRE = new RegExp(
   `<(${colorNameREStr}):([^<>]+)>`,
@@ -228,7 +248,9 @@ function parseNode(
 ): OrgValidNode | undefined {
   let node: OrgValidNode | undefined;
 
-  if (blockBeginRE.test(source)) {
+  if (tableRowRE.test(source)) {
+    node = parseTable(source, list, index);
+  } else if (blockBeginRE.test(source)) {
     node = parseBlock(source, list, index);
   } else if (propertyRE.test(source)) {
     node = parseProperty(source, list, index);
@@ -247,6 +269,45 @@ function parseNode(
   }
 
   return node;
+}
+
+function parseTable(
+  source: string,
+  list: string[],
+  index: number
+): OrgTableNode {
+  let nodes: Array<OrgTableRowType> = [];
+  let indent = source.length - source.trimStart().length;
+
+  let start = index,
+    end = index + 1;
+  for (let i = index; i < list.length; i++) {
+    let s = list[i].trim();
+    if (s == '') {
+      continue;
+    }
+
+    // 使用 tableRowRE 变量的话会存在正则记录 lastIndex 问题
+    if (tableRowLineRE.test(s)) {
+      nodes.push(true);
+    } else if (tableRowRE.test(s)) {
+      const ss = s.replace(/^\||\|$/g, '');
+      nodes.push(ss.split('|'));
+    } else {
+      end = i;
+      break;
+    }
+  }
+
+  const rows = end - start;
+  list.splice(start, rows);
+
+  return {
+    type: OrgNodeTypes.TABLE,
+    nodes,
+    rows,
+    indent,
+  };
 }
 
 function parseList(
