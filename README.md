@@ -22,6 +22,30 @@ LIVE DEMO: https://cheng92.com/demo/org
 
   * [x] Properties
 
+    * [x] CLOSED|DEADLINE -> OrgTimestamp
+
+    * [x] CLOCK -> OrgClockValue -> `{ start, end?, duration? }`
+
+      ```json
+      :LOGBOOK:
+      CLOCK: [2022-08-05 Fri 17:38]--[2022-08-05 Fri 17:39] =>  0:01
+      :END:
+      
+      // => result
+      
+      {
+      	name: 'CLOCK',
+        value: { 
+          start: { year: '2022', month: '08', day: '05', week: 'Fri', time: '17:38' }
+          end: { year: '2022', month: '08', day: '05', week: 'Fri', time: '17:38' }, 
+          duration: '0:01'
+        },
+        category: 'LOGBOOK'
+      }
+      ```
+
+      
+
   * [x] parse header title as text, use `parseText()`
 
     `* TODO header1 :tag1:tag2` =>
@@ -44,6 +68,7 @@ LIVE DEMO: https://cheng92.com/demo/org
 
   * [x] Colorful text, `<red:text1 text2>` or `red:text1text2`
     * [ ] TODO Support emphasis text, `<red:text1 _text2_>`
+  * [ ] Special text, `doc:documentation`
 
 * [x] Attribute, `#+title: org-file-parser-with-js`
 

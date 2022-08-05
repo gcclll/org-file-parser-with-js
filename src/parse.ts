@@ -70,7 +70,7 @@ export type OrgTableRowType = boolean | string[];
 // 结果：[['name', 'value], ['cat', '100']]
 //
 export interface OrgTableNode extends OrgBaseNode {
-  type: OrgNodeTypes.TABLE
+  type: OrgNodeTypes.TABLE;
   nodes: OrgTableRowType[];
   rows: number;
   name?: string;
@@ -123,12 +123,22 @@ export interface OrgPropertyNode extends OrgPairNode<string | boolean> {
   type: OrgNodeTypes.PROPERTY;
 }
 
+export interface OrgClockValue {
+  start: OrgTimestamp | string;
+  end?: OrgTimestamp | string;
+  duration?: string;
+}
+
+export type OrgHeaderProperty = OrgPairNode<OrgHeaderPropertyValue> & {
+  category?: string;
+};
+export type OrgHeaderPropertyValue = string | OrgTimestamp | OrgClockValue;
 export interface OrgHeaderNode extends OrgBaseNode {
   type: OrgNodeTypes.HEADER;
   title: string | OrgTextChildNode;
   level: number;
   tags?: string[];
-  properties?: OrgPairNode<string | OrgTimestamp>[];
+  properties?: OrgHeaderProperty[];
 }
 
 export interface OrgAttribute extends OrgPairNode<string | boolean> {}
@@ -192,7 +202,6 @@ export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
-export const deadlineRE = /^\s*DEADLINE:(.*)/i;
 export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi;
 
 // table regexp
@@ -446,7 +455,7 @@ export function parseExternalLink(node: OrgTextNode) {
 
 export function parseTimestamp(node: OrgTextNode) {
   return parseTextExtra(node, timestampRE, (values: string[]) => {
-    const timestamp: OrgTimestamp = matchTimestamp(values[0]);
+    const timestamp: OrgTimestamp = matchTimestamp(values[0]) as OrgTimestamp;
     return { timestamp, type: OrgNodeTypes.TIMESTAMP };
   });
 }
@@ -587,48 +596,10 @@ function parseHeader(
   if (!matched) return;
 
   const [, stars, title] = matched;
-
-  const properties: OrgPairNode<string | OrgTimestamp>[] = [];
-  // 找到截止时间和 properties, :PROPERTIES: ... :END:
-  for (let i = index + 1; i < list.length; i++) {
-    const next = list[i];
-    if (headerRE.test(next)) break;
-
-    let matched;
-    if (deadlineRE.test(next)) {
-      matched = next.match(deadlineRE);
-      if (matched) {
-        list[i] = '';
-        properties.push({
-          name: 'deadline',
-          value: matchTimestamp(matched[1]),
-        });
-      }
-    } else if (/^\s*:PROPERTIES:/.test(next)) {
-      const endIdx = findIndex(
-        list,
-        (ele: string) => {
-          return /^\s*:END:/.test(ele);
-        },
-        i
-      );
-      if (endIdx === -1) {
-        // TODO error no properties end tag
-      }
-
-      const propList = list.slice(i + 1, endIdx + i);
-      // remove from original list
-      list.splice(i, propList.length + 2, '');
-      propList.forEach((prop) => {
-        const match = prop.match(/^\s*:([\w-_]+):(.*)/i);
-        match &&
-          properties.push({
-            name: match[1].toLowerCase(),
-            value: match[2].trim(),
-          });
-      });
-    }
-  }
+  const properties: Array<OrgHeaderProperty> = parseHeadProperty(
+    index + 1,
+    list
+  );
 
   return {
     type: OrgNodeTypes.HEADER,
@@ -638,6 +609,61 @@ function parseHeader(
     properties,
     tags,
   };
+}
+
+// PROPERTIES, LOGBOOK
+function parseHeadProperty(startIndex: number, list: string[]) {
+  const properties: Array<OrgHeaderProperty> = [];
+
+  const singlePropertyRE = /\s*([A-Z]+):(.*)/; // CLOSED, DEADLINE
+  const multiPropertyRE = /\s*:([A-Z]+):/; // LOGBOOK, PROPERTIES
+  for (let i = startIndex; i < list.length; i++) {
+    const next = list[i];
+    if (headerRE.test(next)) break;
+
+    let matched;
+    if (multiPropertyRE.test(next)) {
+      matched = next.match(multiPropertyRE);
+      const endIdx = findIndex(
+        list,
+        (ele: string) => {
+          return /^\s*:END:/.test(ele);
+        },
+        i
+      );
+      if (endIdx === -1) {
+        // TODO error no end
+      }
+      const propList = list.slice(i + 1, endIdx + i);
+      // remove from original list
+      list.splice(i, propList.length + 2, '');
+      const [, category = ''] = matched || [];
+      propList.forEach((prop: string) => {
+        let [, name = '', value = ''] =
+          prop.match(/^\s*:?([A-Z-_]+):(.*)/) || [];
+        if (name === 'CLOCK') {
+          value = parseClockValue(value.trim()) as string
+        }
+        properties.push({
+          name,
+          value,
+          category,
+        });
+      });
+    } else if (singlePropertyRE.test(next)) {
+      matched = next.match(singlePropertyRE);
+      if (matched) {
+        list[i] = '';
+        const [, name = '', value = ''] = matched;
+        properties.push({
+          name,
+          value: matchTimestamp(value),
+        });
+      }
+    }
+  }
+
+  return properties;
 }
 
 function parseTags(content: string): {
@@ -662,21 +688,26 @@ function parseTags(content: string): {
   };
 }
 
-export function matchTimestamp(timestamp: string): OrgTimestamp {
+export function matchTimestamp(timestamp: string): OrgTimestamp | string {
   const re =
     /((?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})|(?<week>\w{3})|(?<time>\d{2}:\d{2}(-\d{2}:\d{2})?)|(?<dein>[-+]\d+[wydm]))/gi;
 
-  let result: any = {};
+  let result: OrgTimestamp = { year: '', month: '', day: '' };
   for (const match of timestamp.matchAll(re)) {
     const gs = match.groups;
     if (gs) {
       Object.keys(gs).forEach((key) => {
-        if (gs[key]) result[key as string] = gs[key];
+        if (gs[key]) result[key as keyof OrgTimestamp] = gs[key];
       });
     }
   }
 
-  return result as OrgTimestamp;
+  const { year, month, day } = result;
+  if (!year && !month && !day) {
+    return timestamp.trim();
+  }
+
+  return result;
 }
 
 function findIndex(
@@ -758,4 +789,23 @@ function parseTextExtra(
   node.children = children.filter((child: any) => child!.content !== '');
 
   return node;
+}
+
+//[2022-08-05 Fri 17:38]--[2022-08-05 Fri 17:39] =>  0:01
+// => { start: OrgTimeStamp, end: OrgTimestamp, duration: '0:01' }
+function parseClockValue(value: string): OrgClockValue | string {
+  const re =
+    /\[(\d{4}-\d{2}-\d{2}\s+[\w\s\d:]+)]\s*--\s*\[(\d{4}-\d{2}-\d{2}\s+[\w\s\d:]+)]\s+=>\s+(.*)/;
+
+  const [, start = '', end = '', duration = ''] = value.match(re) || [];
+
+  if (start) {
+    return {
+      start: matchTimestamp(start),
+      end: matchTimestamp(end),
+      duration,
+    };
+  }
+
+  return value;
 }

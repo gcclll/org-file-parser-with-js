@@ -2,7 +2,16 @@
 #+author: gcclll
 #+email: gccll.love@gmail.com
 
+* DONE Header Properties
+CLOSED: [2022-08-05 Fri 17:39]
+DEADLINE: <2022-08-05 Fri>
+TEST: test content
+:LOGBOOK:
+CLOCK: [2022-08-05 Fri 17:38]--[2022-08-05 Fri 17:39] =>  0:01
+:END:
 
+
+* Table
 
 | name | value |
 |------+-------|
@@ -11,8 +20,10 @@
 
 I'am test test!!!!
 
+* Timestamp
 <2022-02-12 18:00 Wed +1d> test <2033-03-13 22:00> test !!xxx!!
 
+* Links
 I'm an image link [[a.png]], you can display it in org file.
 
 inner link: <<test>> ???
@@ -21,6 +32,7 @@ keywords: TODO, DONE, CANCELLED, ???
 
 link with abbrev: [[d.png:d-img][description]] ???
 
+* List
 Orderless List:
 
 - orderless list item 1
@@ -31,11 +43,12 @@ Order List:
 1. order list item 1
 2. order list item 2
 
-
+* Colorful Text
 <red:text1 text2>
 
 _red:text1-text2_
 
+* Textbox
 #+begin_textbox
 test box
 
@@ -49,7 +62,7 @@ test box
 
 
 #+end_textbox
-
+* Sub/Sup Scripts
 suptext^sup xxxx text subtext_sub jjjjkkkj
 
 * TODO header1^sup  xx_sub :tag1:tag2:
