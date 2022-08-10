@@ -68,11 +68,16 @@ LIVE DEMO: https://cheng92.com/demo/org
 
   * [x] Colorful text, `<red:text1 text2>` or `red:text1text2`
     * [ ] TODO Support emphasis text, `<red:text1 _text2_>`
+
+  * [x] Nested emphasis node
+
+    `_underline before <red:colorfultext> after_`
+
   * [ ] Special text, `doc:documentation`
 
 * [x] Attribute, `#+title: org-file-parser-with-js`
 
-* [x] Emphasis, `~~, ==, ++, __, //, $$`
+* [x] Self-define Emphasis, `~~, ==, ++, __, //, $$`
 
   * [x] [extra]( https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) : `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
 
