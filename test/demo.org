@@ -2,6 +2,11 @@
 #+author: gcclll
 #+email: gccll.love@gmail.com
 
+* Nested Emphasis Node
+
+
+text text _text1 <red:emphasis1-emphasis2> text2_ text text
+
 * DONE Header Properties
 CLOSED: [2022-08-05 Fri 17:39]
 DEADLINE: <2022-08-05 Fri>

@@ -385,7 +385,7 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
 // red:xxxx
 export function parseColorfulBareText(node: OrgTextNode) {
   return parseTextExtra(node, colorfulBareTextRE, (values: string[]) => {
-    const [color, text] = values;
+    const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
       color,
@@ -398,7 +398,7 @@ export function parseColorfulBareText(node: OrgTextNode) {
 // <red:xxx yyy>
 export function parseColorfulText(node: OrgTextNode) {
   return parseTextExtra(node, colorfulTextRE, (values: string[]) => {
-    const [color, text] = values;
+    const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
       color,
@@ -410,7 +410,7 @@ export function parseColorfulText(node: OrgTextNode) {
 
 export function parseSubSupText(node: OrgTextNode) {
   return parseTextExtra(node, subSupRE, (values: string[]) => {
-    const [target, sign] = values;
+    const [, target, sign] = values;
     const o = { target, sign, type: OrgNodeTypes.SUB_SUP } as OrgSubSupNode;
     if (sign === SIGN_SUB) {
       o.sub = true;
@@ -423,19 +423,19 @@ export function parseSubSupText(node: OrgTextNode) {
 
 export function parseStateKeywords(node: OrgTextNode) {
   return parseTextExtra(node, stateRE, (values: string[]) => {
-    return { type: OrgNodeTypes.STATE, state: values[0] as any };
+    return { type: OrgNodeTypes.STATE, state: values[1] as any };
   });
 }
 
 export function parseInnerLink(node: OrgTextNode) {
   return parseTextExtra(node, innerLinkRE, (values: string[]) => {
-    return { type: OrgNodeTypes.LINK, linkType: 'inner', url: values[0] };
+    return { type: OrgNodeTypes.LINK, linkType: 'inner', url: values[1] };
   });
 }
 
 export function parseExternalLink(node: OrgTextNode) {
   return parseTextExtra(node, extLinkRE, (values: string[]) => {
-    const [url, description] = values;
+    const [, url, description] = values;
     const trimUrl = url.trim();
     // [[url:abbrev][description]]
     const match = /:([\w_-]+)$/.exec(trimUrl);
@@ -455,19 +455,22 @@ export function parseExternalLink(node: OrgTextNode) {
 
 export function parseTimestamp(node: OrgTextNode) {
   return parseTextExtra(node, timestampRE, (values: string[]) => {
-    const timestamp: OrgTimestamp = matchTimestamp(values[0]) as OrgTimestamp;
+    const timestamp: OrgTimestamp = matchTimestamp(values[1]) as OrgTimestamp;
     return { timestamp, type: OrgNodeTypes.TIMESTAMP };
   });
 }
 
 export function parseEmphasisText(node: OrgTextNode) {
   return parseTextExtra(node, emphasisRE, (values: string[]) => {
-    const [sign, matchValue] = values;
-    return {
+    const [, sign, matchValue] = values;
+    const node: OrgEmphasisNode = {
       type: OrgNodeTypes.EMPHASIS,
       sign: sign as InlineEmphasisSign,
       content: matchValue,
     };
+    const nested = parseNestedEmphasisNode(values[0])
+    node.children = nested.children
+    return node
   });
 }
 
@@ -642,7 +645,7 @@ function parseHeadProperty(startIndex: number, list: string[]) {
         let [, name = '', value = ''] =
           prop.match(/^\s*:?([A-Z-_]+):(.*)/) || [];
         if (name === 'CLOCK') {
-          value = parseClockValue(value.trim()) as string
+          value = parseClockValue(value.trim()) as string;
         }
         properties.push({
           name,
@@ -748,7 +751,7 @@ function parseTextExtra(
 
     if (child.type === OrgNodeTypes.TEXT && typeof source === 'string') {
       while ((result = re.exec(source))) {
-        const [matchText, ...values] = result;
+        const [matchText] = result;
         const pureText = source.slice(cursor, result.index);
         // left text node
         children.push({
@@ -759,7 +762,7 @@ function parseTextExtra(
         });
 
         // current node, more value to outer fn
-        const current = parser(values);
+        const current = parser(result);
 
         if (current) {
           children.push({
@@ -808,4 +811,169 @@ function parseClockValue(value: string): OrgClockValue | string {
   }
 
   return value;
+}
+
+/////////////////////// parse nested ///////////////////////////////////////
+/////////// 代码参考 vue-next/packages/compiler-core/src/parser.ts //////////
+const tagMap: Record<string, string> = {
+  _: '_',
+  '<': '>',
+  '+': '+',
+};
+
+export function last<T>(xs: T[]): T | undefined {
+  return xs[xs.length - 1];
+}
+
+function isStartTag(ch: string): boolean {
+  return Object.keys(tagMap).includes(ch);
+}
+
+function isEndTag(ch: string): boolean {
+  return Object.values(tagMap).includes(ch);
+}
+
+export interface OrgNestContext {
+  source: string;
+}
+
+export function parseNestedEmphasisNode(content: string): OrgTextChildNode {
+  content = `${content}   `;
+  const context: OrgNestContext = { source: content };
+  const root: OrgEmphasisNode = {
+    type: OrgNodeTypes.EMPHASIS,
+    sign: '' as InlineEmphasisSign,
+    children: [],
+  };
+  root.children = parseChildren(context, []);
+  root.children = root.children.filter(child => {
+    if (typeof child.content === 'string') {
+      return child.content.trim() !== ''
+    }
+    return true
+  })
+  return root;
+}
+
+function parseChildren(
+  context: OrgNestContext,
+  ancestors: OrgTextChildNode[]
+): OrgTextChildNode[] {
+  const nodes: OrgTextChildNode[] = [];
+
+  while (!isEnd(context, ancestors)) {
+    const s = context.source;
+    let node: OrgTextChildNode | undefined = undefined;
+
+    if (isStartTag(s[0]) && s[1] !== ' ') {
+      node = parseElement(context, ancestors);
+    } else if (isEndTag(s[0])) {
+      context.source = context.source.slice(1);
+      continue;
+    }
+
+    if (!node) {
+      node = parseNestText(context);
+    }
+
+    if (isArray(node)) {
+      for (let i = 0; i < node.length; i++) {
+        pushNode<OrgTextChildNode>(nodes, node[i]);
+      }
+    } else {
+      pushNode<OrgTextChildNode>(nodes, node);
+    }
+  }
+
+  return nodes;
+}
+
+function parseElement(
+  context: OrgNestContext,
+  ancestors: OrgTextChildNode[]
+): OrgEmphasisNode {
+  const s = context.source;
+  const tag = s[0];
+  context.source = s.trimStart().slice(1);
+  const element: OrgEmphasisNode = {
+    type: OrgNodeTypes.EMPHASIS,
+    sign: tag as InlineEmphasisSign,
+    children: [],
+  };
+
+  ancestors.push(element);
+  const children = parseChildren(context, ancestors);
+  ancestors.pop();
+
+  element.children = children;
+
+  const endTag = tagMap[element.sign];
+  if (startsWith(context.source, endTag)) {
+    context.source = context.source.slice(1);
+  }
+
+  return element;
+}
+
+const endTokens: string[] = ['_', '>', '+', '<'];
+
+function parseNestText(context: OrgNestContext): OrgTextNode {
+  const s = context.source;
+  let endIndex = s.length;
+
+  for (let i = 0; i < endTokens.length; i++) {
+    const index = s.indexOf(endTokens[i], 1);
+    if (index !== -1 && endIndex > index) {
+      endIndex = index;
+    }
+  }
+
+  const content = s.slice(0, endIndex);
+  context.source = s.slice(endIndex);
+
+  return {
+    type: OrgNodeTypes.TEXT,
+    content,
+  };
+}
+
+function pushNode<T>(nodes: T[], node: T): void {
+  nodes.push(node);
+}
+
+function isEnd(
+  context: OrgNestContext,
+  ancestors: OrgTextChildNode[]
+): boolean {
+  const s = context.source;
+  const tags = Object.entries(tagMap);
+  for (let i = 0; i < tags.length; i++) {
+    const [start, end = start] = tags[i];
+    if (checkIsEnd(s, ancestors, start, end)) {
+      return true;
+    }
+  }
+
+  return !s;
+}
+
+function checkIsEnd(
+  s: string,
+  ancestors: OrgTextChildNode[],
+  startTag: string,
+  endTag = startTag
+): boolean {
+  if (startsWith(s, endTag)) {
+    for (let i = ancestors.length - 1; i >= 0; --i) {
+      const c = ancestors[i];
+      if ('sign' in c && c.sign === startTag) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function startsWith(s1: string, s2: string): boolean {
+  return s1.startsWith(s2);
 }
