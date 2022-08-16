@@ -1,12 +1,32 @@
 {
+  "name": "org-file-parser-with-js",
+  "author": "gcclll <gccll.love@gmail.com>",
   "version": "0.1.26",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "src/index.ts",
-  "typings": "dist/index.d.ts",
+  "description": "A parser for Emacs Org mode files.",
+  "main": "./dist/org-file-parser-with-js.cjs.production.min.js",
+  "module": "./dist/org-file-parser-with-js.esm.js",
+  "typings": "./dist/parse.d.ts",
   "files": [
     "dist",
     "src"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/org-file-parser-with-js.esm.js",
+      "require": "./dist/org-file-parser-with-js.cjs.production.min.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gcclll/org-file-parser-with-js"
+  },
+  "keywords": [
+    "emacs",
+    "org-mode",
+    "javascript",
+    "parser",
+    "typescript"
   ],
   "engines": {
     "node": ">=10"
@@ -32,8 +52,6 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "org-file-parser-with-js",
-  "author": "gcclll",
   "size-limit": [
     {
       "path": "dist/org-file-parser-with-js.cjs.production.min.js",
