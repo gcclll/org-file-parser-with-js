@@ -4,20 +4,13 @@
   "version": "0.1.28",
   "license": "MIT",
   "description": "A parser for Emacs Org mode files.",
-  "main": "./dist/org-file-parser-with-js.cjs.production.min.js",
-  "module": "./dist/org-file-parser-with-js.esm.js",
-  "typings": "./dist/parse.d.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./dist/parse.d.ts",
   "files": [
     "dist",
     "src"
   ],
-  "exports": {
-    ".": {
-      "import": "./dist/org-file-parser-with-js.esm.js",
-      "require": "./dist/org-file-parser-with-js.cjs.production.min.js"
-    },
-    "./*": "./*"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gcclll/org-file-parser-with-js"
