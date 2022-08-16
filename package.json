@@ -22,6 +22,16 @@
     "type": "git",
     "url": "git+https://github.com/gcclll/org-file-parser-with-js"
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "dist/*",
+        "dist/*.d.ts",
+        "src/*"
+      ]
+    }
+  },
   "keywords": [
     "emacs",
     "org-mode",
