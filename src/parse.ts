@@ -301,7 +301,7 @@ function parseTable(
       nodes.push(true);
     } else if (tableRowRE.test(s)) {
       const ss = s.replace(/^\||\|$/g, '');
-      nodes.push(ss.split('|'));
+      nodes.push(ss.split('|').map(s => s.trim()));
     } else {
       end = i;
       break;
