@@ -15,7 +15,8 @@
     ".": {
       "import": "./dist/org-file-parser-with-js.esm.js",
       "require": "./dist/org-file-parser-with-js.cjs.production.min.js"
-    }
+    },
+    "./*": "./*"
   },
   "repository": {
     "type": "git",
