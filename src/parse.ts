@@ -63,7 +63,12 @@ export interface OrgBaseNode {
   children?: OrgTextChildNode[];
 }
 
-export type OrgTableRowType = boolean | string[];
+export type OrgTableRowType = Record<string, string>;
+
+export interface OrgTableColumn {
+  label: string;
+  prop: string;
+}
 // 第一行必需是表头，用表头的列内容做为对象的 key
 // 如：|name|value|
 //     |cat|100|
@@ -72,6 +77,7 @@ export type OrgTableRowType = boolean | string[];
 export interface OrgTableNode extends OrgBaseNode {
   type: OrgNodeTypes.TABLE;
   nodes: OrgTableRowType[];
+  columns: Array<OrgTableColumn>;
   rows: number;
   name?: string;
 }
@@ -286,6 +292,7 @@ function parseTable(
   index: number
 ): OrgTableNode {
   let nodes: Array<OrgTableRowType> = [];
+  let firstRow: Array<string> | undefined;
   let indent = source.length - source.trimStart().length;
 
   let start = index,
@@ -298,10 +305,23 @@ function parseTable(
 
     // 使用 tableRowRE 变量的话会存在正则记录 lastIndex 问题
     if (tableRowLineRE.test(s)) {
-      nodes.push(true);
+      // nodes.push(true);
     } else if (tableRowRE.test(s)) {
       const ss = s.replace(/^\||\|$/g, '');
-      nodes.push(ss.split('|').map(s => s.trim()));
+      const values = ss.split('|').map((s) => s.trim());
+      if (!firstRow) {
+        firstRow = values;
+        continue;
+      }
+
+      // ['a', 'b', 'c'] => { '0': 'a', '1': 'b', '2': 'c' }
+      // 与 columns 对应关系：[{ label: 'xxx', prop: '0' }, ...]
+      nodes.push(
+        values.reduce((o, val, index) => {
+          o[index + ''] = val;
+          return o;
+        }, {} as { [prop: string]: string })
+      );
     } else {
       end = i;
       break;
@@ -314,6 +334,12 @@ function parseTable(
   return {
     type: OrgNodeTypes.TABLE,
     nodes,
+    columns: firstRow
+      ? firstRow.map((val: string, i: number) => ({
+          label: val,
+          prop: i + '',
+        }))
+      : [],
     rows,
     indent,
   };
@@ -468,9 +494,9 @@ export function parseEmphasisText(node: OrgTextNode) {
       sign: sign as InlineEmphasisSign,
       content: matchValue,
     };
-    const nested = parseNestedEmphasisNode(values[0])
-    node.children = nested.children
-    return node
+    const nested = parseNestedEmphasisNode(values[0]);
+    node.children = nested.children;
+    return node;
   });
 }
 
@@ -846,12 +872,12 @@ export function parseNestedEmphasisNode(content: string): OrgTextChildNode {
     children: [],
   };
   root.children = parseChildren(context, []);
-  root.children = root.children.filter(child => {
+  root.children = root.children.filter((child) => {
     if (typeof child.content === 'string') {
-      return child.content.trim() !== ''
+      return child.content.trim() !== '';
     }
-    return true
-  })
+    return true;
+  });
   return root;
 }
 

@@ -143,7 +143,7 @@ LIVE DEMO: https://cheng92.com/demo/org
 
 * [x] TODO, DONE, etc. keywords
 
-* [ ] Table
+* [x] Table
 
   * [x] Base table
 
@@ -151,18 +151,38 @@ LIVE DEMO: https://cheng92.com/demo/org
     | name | value |
     |------+-------|
     | xxx  | yyy   |
+    ```
     
-    // => 
+    result:
+    
+    ```json
     {
-      type: OrgNodeTypes.TABLE,
-      nodes: [
-        ['name', 'value'],
-        ['xxx', 'yyy']
-      ],
-      ...
+        "type": 12, // OrgNodeTypes.TABLE
+        "nodes": [ // table rows
+            {
+                "0": "xx",
+                "1": "yy"
+            },
+            {
+                "0": "al",
+                "1": "bb"
+            }
+        ],
+        "columns": [ // table column properties
+            {
+                "label": "name",
+                "prop": "0"
+            },
+            {
+                "label": "value",
+                "prop": "1"
+            }
+        ],
+        "rows": 4,
+        "indent": 0
     }
     ```
-
+    
     
 
 
