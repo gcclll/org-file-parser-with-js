@@ -209,7 +209,7 @@ export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 // 增加支持emphasis,colorful 上下标
-export const subSupRE = /(\w+)(\^|_){?([\w-=:~\+/*]+)}?/gi;
+export const subSupRE = /(\w+)(\^|_){?([<\w-=:~\+/*>]+)}?/gi;
 
 // table regexp
 export const tableRowRE = /^(\s*)\|(.*?)\|$/;
@@ -220,6 +220,7 @@ export const colorfulTextRE = new RegExp(
   `<(${colorNameREStr}):([^<>]+)>`,
   'gi'
 );
+// FIX: 支持完整字符串为: `red:text` 格式
 export const colorfulBareTextRE = new RegExp(
   `\\s+(${colorNameREStr}):([^\\s]+)\\s+`,
   'gi'
@@ -446,6 +447,7 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
 export function parseColorfulBareText(node: OrgTextNode) {
   return parseTextExtra(node, colorfulBareTextRE, (values: string[]) => {
     const [, color, text] = values;
+    console.log({ color, text, values });
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
       color,
@@ -830,7 +832,8 @@ function parseTextExtra(
   node.children!.forEach((child: OrgTextChildNode) => {
     let cursor = 0,
       result;
-    const source = child.content;
+    // FIX: `red:text` 因为前后没有空格不能被正确解析
+    const source = ` ${child.content} `;
 
     if (child.type === OrgNodeTypes.TEXT && typeof source === 'string') {
       while ((result = re.exec(source))) {
@@ -839,7 +842,7 @@ function parseTextExtra(
         // left text node
         children.push({
           type: OrgNodeTypes.TEXT,
-          content: pureText,
+          content: pureText.trim(),
           indent: 0,
           children: [],
         });
@@ -850,7 +853,7 @@ function parseTextExtra(
         if (current) {
           children.push({
             ...child,
-            content: matchText,
+            content: matchText.trim(),
             ...current,
           });
         }
@@ -862,7 +865,7 @@ function parseTextExtra(
         // right text node
         children.push({
           type: OrgNodeTypes.TEXT,
-          content: source.slice(cursor),
+          content: source.slice(cursor).trim(),
           indent: 0,
           children: [],
         });
