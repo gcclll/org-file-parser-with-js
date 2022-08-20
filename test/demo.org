@@ -70,7 +70,7 @@ test box
 * Sub/Sup Scripts
 suptext^sup xxxx text subtext_sub jjjjkkkj
 
-* TODO header1^sup  xx_sub :tag1:tag2:
+* TODO header1^{red:sup}  xx_{green:sub}  bold^{*sup*} italic_{/sub/} :tag1:tag2:
 DEADLINE: <2022-07-06 Wed>
 :PROPERTIES:
 :STYLE: .test{color:red}

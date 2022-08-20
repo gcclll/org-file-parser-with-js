@@ -87,6 +87,8 @@ LIVE DEMO: https://cheng92.com/demo/org
 
 * [x] Subscripts and Superscripts
 
+  * [x] more richable text, eg. Emphasis, Colorful text
+
 * [ ] List
 
   * [x] Unordered lists, `-, +, * `

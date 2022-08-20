@@ -18,16 +18,15 @@ export enum OrgNodeTypes {
   PROPERTY, // #+...
   HEADER, // ** ...
   BLOCK, // #+begin...#+end
+
   EMPHASIS, // =,_,/,+,$,[!&%@]{2}
   LIST, // - [-], 1. ...
   TIMESTAMP, // <2022-11-12 Wed 12:00>
-
   LINK, // external: [[url][name]], inner: <<meta_id>>
   STATE, // TODO, DONE, etc.
 
   SUB_SUP, // 下标或上标
   COLORFUL_TEXT, // 带颜色的文本
-
   TABLE, // 表格
 }
 
@@ -121,6 +120,7 @@ export interface OrgSubSupNode extends OrgBaseNode {
   type: OrgNodeTypes.SUB_SUP;
   sign: '_' | '^';
   target: string;
+  value: string | OrgTextNode; // maybe colorful/emphasis node
   sub?: boolean;
   sup?: boolean;
 }
@@ -208,7 +208,8 @@ export const innerLinkRE = /<<([^<>]+)>>/g;
 export const emphasisRE =
   /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
-export const subSupRE = /(\w+)(\^|_){?([\w_-]+)}?/gi;
+// 增加支持emphasis,colorful 上下标
+export const subSupRE = /(\w+)(\^|_){?([\w-=:~\+/*]+)}?/gi;
 
 // table regexp
 export const tableRowRE = /^(\s*)\|(.*?)\|$/;
@@ -366,6 +367,61 @@ function parseList(
   };
 }
 
+export function parseTextWithNode(
+  node: OrgTextNode,
+  keyOrAll?: string | boolean
+): OrgTextChildNode | undefined {
+  let key = 'content',
+    all = false;
+  if (typeof keyOrAll === 'string') {
+    key = keyOrAll;
+  } else if (typeof keyOrAll === 'boolean') {
+    all = keyOrAll;
+  }
+  const s = node[key as keyof OrgTextNode];
+
+  const reParserMap: Array<[RegExp, (node: OrgTextNode) => OrgTextChildNode]> =
+    [
+      // parse timestamp text, 如：<2022-11-11 20:00>
+      [timestampRE, parseTimestamp],
+      // parse external links(inc. image) in text, 如：[[desc][link]]
+      [extLinkRE, parseExternalLink],
+      // parse inner links, 如：<<meta-id>>
+      [innerLinkRE, parseInnerLink],
+      // parse state keywords(eg. TODO, DONE, CANCELLED)
+      [stateRE, parseStateKeywords],
+      // parse sub or sup text, 如：header_sub 或 header_{sub}
+      [subSupRE, parseSubSupText],
+      // parse colorful text, 如：<red:red text>
+      [colorfulTextRE, parseColorfulText],
+      // parse colorful bare text, 如：red:red-text
+      [colorfulBareTextRE, parseColorfulBareText],
+      // parse emphasis text, 如：_underline_, *border*, /italic/,...
+      // 必需放到最后，因为 emphasis 中的一些符号可能会被用在其它特殊文本中
+      // 代表其它含义，比如：标题中的上下标的使用时就不应该首先被解析成emphasis
+      [emphasisRE, parseEmphasisText],
+    ];
+
+  // 需要递归进行解析，因此需要保证每个函数都能被执行到
+  if (all) {
+    reParserMap.forEach(([, parser]) => parser(node));
+    return;
+  }
+
+  // 这里适合用于单个匹配情况下执行，满足一个正则就立即解析出结果
+  // 如：标题上有上下标时(sub/sup)，而上下标又支持富文本情况(如：颜色，斜体等等)
+  // 但不能多重嵌套(TODO)
+  for (let i = 0; i < reParserMap.length; i++) {
+    const [re, parser] = reParserMap[i];
+
+    if (typeof s === 'string' && re.test(s)) {
+      return parser(node);
+    }
+  }
+
+  return;
+}
+
 function parseText(source: string, _: string[], __: number): OrgTextNode {
   const matched = source.match(/^(\s+)/);
   let indent = 0;
@@ -380,29 +436,7 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
     children: [],
   };
 
-  // 1. parse emphasis text
-  parseEmphasisText(node);
-
-  // 2. parse timestamp text
-  parseTimestamp(node);
-
-  // 3. parse external links(inc. image) in text
-  parseExternalLink(node);
-
-  // 4. parse inner links
-  parseInnerLink(node);
-
-  // 5. parse state keywords(eg. TODO, DONE, CANCELLED)
-  parseStateKeywords(node);
-
-  // 6. parse sub or sup text
-  parseSubSupText(node);
-
-  // 7. parse colorful text
-  parseColorfulText(node);
-
-  // 8. parse colorful bare text
-  parseColorfulBareText(node);
+  parseTextWithNode(node, true);
 
   // 将内容解析成 children，content 置空
   return node;
@@ -436,8 +470,13 @@ export function parseColorfulText(node: OrgTextNode) {
 
 export function parseSubSupText(node: OrgTextNode) {
   return parseTextExtra(node, subSupRE, (values: string[]) => {
-    const [, target, sign] = values;
-    const o = { target, sign, type: OrgNodeTypes.SUB_SUP } as OrgSubSupNode;
+    const [, target, sign, value] = values;
+    const o = {
+      target,
+      sign,
+      type: OrgNodeTypes.SUB_SUP,
+      value,
+    } as OrgSubSupNode;
     if (sign === SIGN_SUB) {
       o.sub = true;
     } else {
@@ -624,15 +663,32 @@ function parseHeader(
 
   if (!matched) return;
 
-  const [, stars, title] = matched;
+  let [, stars, title] = matched;
   const properties: Array<OrgHeaderProperty> = parseHeadProperty(
     index + 1,
     list
   );
 
+  const titled: OrgTextChildNode = parseText(title, list, index);
+
+  const { children = [] } = titled;
+  if (children.length) {
+    // 进一步解析 child.type 是 OrgNodeTypes.SUB_SUP 类型的节点
+    // 因为它可能是富文本形式(colorful/emphasis)
+    titled.children = children.map((child) => {
+      if (
+        child.type === OrgNodeTypes.SUB_SUP &&
+        typeof child.value === 'string'
+      ) {
+        child.value = parseText(child.value, [], 0);
+      }
+      return child;
+    });
+  }
+
   return {
     type: OrgNodeTypes.HEADER,
-    title: parseText(title, list, index),
+    title: titled,
     indent: 0,
     level: stars.length,
     properties,
@@ -699,7 +755,8 @@ function parseTags(content: string): {
   content: string;
   tags: string[];
 } {
-  const tagRE = /:(.*):/gi;
+  // 标题上下标需要支持更多样式，如：颜色，因此需要过滤掉 ^{}, 或 _{} 情况
+  const tagRE = /:[^{}]+:/gi;
   let matched: string[] | null = null;
   let tags: string[] = [];
   if (content == '') {
