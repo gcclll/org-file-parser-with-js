@@ -4,7 +4,7 @@ export interface OrgParserOptions {
   onError: (error: Error) => void;
 }
 
-export const enum OrgStates {
+export enum OrgStates {
   DONE = 'DONE',
   DOING = 'DOING',
   WAITING = 'WAITING',
@@ -12,7 +12,7 @@ export const enum OrgStates {
   SCHEDULED = 'SCHEDULED',
 }
 
-export const enum OrgNodeTypes {
+export enum OrgNodeTypes {
   ROOT, // 根节点
   TEXT, // pure text
   PROPERTY, // #+...
@@ -175,7 +175,7 @@ export interface OrgListNode extends OrgBaseNode {
   state: OrgListItemState;
 }
 
-export const enum InlineEmphasisSign {
+export enum InlineEmphasisSign {
   CODE_EQUAL = '=',
   CODE_WAVE = '~',
   LINE_THROUGH = '+',
