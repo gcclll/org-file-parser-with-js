@@ -24,7 +24,7 @@ export const subSupXRE = /^([\w-]+)(\^|_){([<\w-=:~\+/*>]+)}/;
 export const tableRowRE = /^(\s*)\|(.*?)\|$/;
 export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
 
-const colorNameREStr = `\\[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
+const colorNameREStr = `[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
 export const colorfulTextRE = new RegExp(
   `<(${colorNameREStr}):([^<>]+)>`,
   'gi'
