@@ -25,17 +25,21 @@ export const tableRowRE = /^(\s*)\|(.*?)\|$/;
 export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
 
 const colorNameREStr = `[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
+
 export const colorfulTextRE = new RegExp(
   `<(${colorNameREStr}):([^<>]+)>`,
   'gi'
 );
+
+// TODO 不支持太复杂的嵌套，如：_u1 <red:underline /it<red:a>lic/ c2> u2_
+// 其中的 <red:a> 就解析不出来
 export const colorfulTextXRE = new RegExp(
   `^<(${colorNameREStr}):([^<>]+)>`,
   'i'
 );
 // FIX: 支持完整字符串为: `red:text` 格式
 export const colorfulBareTextRE = new RegExp(
-  `\\s*(${colorNameREStr}):([^\\s<>]+)\\s+`,
+  `\\s+(${colorNameREStr}):([^\\s<>]+)\\s+`,
   'gi'
 );
 

@@ -165,6 +165,7 @@ function parseChildren(
         }
       } else if (s[0] === '<') {
         jumpOut = true;
+        console.log({ s, x: re.colorfulTextXRE.test(s), r: re.colorfulTextXRE })
         if (s[1] === '<' && re.innerLinkXRE.test(s)) {
           node = parseInnerLink(context);
         } else if (re.timestampXRE.test(s)) {
@@ -200,7 +201,7 @@ function parseChildren(
   return nodes;
 }
 
-function advanceBy(context: OrgNestContext, nn?: number): void {
+export function advanceBy(context: OrgNestContext, nn?: number): void {
   const s = context.source;
   let n = s.length - s.trimStart().length;
   if (nn && nn > 0) n = nn;
