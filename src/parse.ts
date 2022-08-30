@@ -3,8 +3,6 @@ import {
   OrgAttribute,
   OrgBlockNode,
   OrgBlockOptions,
-  OrgEmphasisNode,
-  InlineEmphasisSign,
   OrgListNode,
   OrgListItemState,
   OrgHeaderNode,
@@ -12,7 +10,6 @@ import {
   OrgClockValue,
   OrgPropertyNode,
   OrgSubSupNode,
-  OrgTimestamp,
   OrgTextNode,
   OrgTableNode,
   OrgTableRowType,
@@ -23,7 +20,7 @@ import {
   SIGN_SUB,
 } from './ast';
 import * as re from './regexp';
-import { parseEmphasisNode } from './emphasis'
+import { parseEmphasisNode } from './emphasis';
 import { matchTimestamp, findIndex } from './utils';
 
 export function baseParse(
@@ -180,24 +177,12 @@ export function parseTextWithNode(
 
   const reParserMap: Array<[RegExp, (node: OrgTextNode) => OrgTextChildNode]> =
     [
-      // parse timestamp text, 如：<2022-11-11 20:00>
-      [re.timestampRE, parseTimestamp],
-      // parse external links(inc. image) in text, 如：[[desc][link]]
-      [re.extLinkRE, parseExternalLink],
-      // parse inner links, 如：<<meta-id>>
-      [re.innerLinkRE, parseInnerLink],
       // parse state keywords(eg. TODO, DONE, CANCELLED)
       [re.stateRE, parseStateKeywords],
       // parse sub or sup text, 如：header_sub 或 header_{sub}
       [re.subSupRE, parseSubSupText],
-      // parse colorful text, 如：<red:red text>
-      [re.colorfulTextRE, parseColorfulText],
       // parse colorful bare text, 如：red:red-text
       [re.colorfulBareTextRE, parseColorfulBareText],
-      // parse emphasis text, 如：_underline_, *border*, /italic/,...
-      // 必需放到最后，因为 emphasis 中的一些符号可能会被用在其它特殊文本中
-      // 代表其它含义，比如：标题中的上下标的使用时就不应该首先被解析成emphasis
-      [re.emphasisRE, parseEmphasisText],
     ];
 
   // 需要递归进行解析，因此需要保证每个函数都能被执行到
@@ -232,30 +217,44 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
     content: source.trim(),
     indent,
     children: [],
-  };
+  }; // parseEmphasisNode(source.trim());
+  // node.indent = indent
 
   parseTextWithNode(node, true);
 
-  // 将内容解析成 children，content 置空
+  const children = [];
+
+  if (node.children?.length) {
+    for (let i = 0; i < node.children!.length; i++) {
+      const child = node.children[i];
+      if (!child) continue;
+
+      if (
+        child.type === OrgNodeTypes.COLORFUL_TEXT ||
+        child.type === OrgNodeTypes.STATE ||
+        child.type === OrgNodeTypes.SUB_SUP
+      ) {
+        // 简单文本已经处理过了，不需要再处理
+        children.push(child);
+        continue;
+      }
+
+      // 复杂，成对(_underline_, ...)，可能嵌套的富文本，解析出来合并
+      const complexNode: OrgTextNode = parseEmphasisNode(
+        child.content as string
+      );
+      children.push(...(complexNode.children || []));
+    }
+  }
+
+  node.children = children;
+
   return node;
 }
 
 // red:xxxx
 export function parseColorfulBareText(node: OrgTextNode) {
   return parseTextExtra(node, re.colorfulBareTextRE, (values: string[]) => {
-    const [, color, text] = values;
-    return {
-      type: OrgNodeTypes.COLORFUL_TEXT,
-      color,
-      content: text as any, //parseText(text, 0),
-      indent: 0,
-    };
-  });
-}
-
-// <red:xxx yyy>
-export function parseColorfulText(node: OrgTextNode) {
-  return parseTextExtra(node, re.colorfulTextRE, (values: string[]) => {
     const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
@@ -287,54 +286,6 @@ export function parseSubSupText(node: OrgTextNode) {
 export function parseStateKeywords(node: OrgTextNode) {
   return parseTextExtra(node, re.stateRE, (values: string[]) => {
     return { type: OrgNodeTypes.STATE, state: values[1] as any };
-  });
-}
-
-export function parseInnerLink(node: OrgTextNode) {
-  return parseTextExtra(node, re.innerLinkRE, (values: string[]) => {
-    return { type: OrgNodeTypes.LINK, linkType: 'inner', url: values[1] };
-  });
-}
-
-export function parseExternalLink(node: OrgTextNode) {
-  return parseTextExtra(node, re.extLinkRE, (values: string[]) => {
-    const [, url, description] = values;
-    const trimUrl = url.trim();
-    // [[url:abbrev][description]]
-    const match = /:([\w_-]+)$/.exec(trimUrl);
-    let abbrev = '';
-    if (match) {
-      abbrev = match[1] || '';
-    }
-    return {
-      type: OrgNodeTypes.LINK,
-      linkType: 'external',
-      url: trimUrl,
-      description,
-      abbrev,
-    };
-  });
-}
-
-export function parseTimestamp(node: OrgTextNode) {
-  return parseTextExtra(node, re.timestampRE, (values: string[]) => {
-    const timestamp: OrgTimestamp = matchTimestamp(values[1]) as OrgTimestamp;
-    return { timestamp, type: OrgNodeTypes.TIMESTAMP };
-  });
-}
-
-export function parseEmphasisText(node: OrgTextNode) {
-  return parseTextExtra(node, re.emphasisRE, (values: string[]) => {
-    const [, sign, matchValue] = values;
-    console.log({ matchValue });
-    const node: OrgEmphasisNode = {
-      type: OrgNodeTypes.EMPHASIS,
-      sign: sign as InlineEmphasisSign,
-      content: matchValue,
-    };
-    const nested = parseEmphasisNode(values[0]);
-    node.children = nested.children;
-    return node;
   });
 }
 

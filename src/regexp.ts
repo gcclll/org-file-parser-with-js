@@ -17,13 +17,14 @@ export const emphasisRE =
 export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
 export const timestampXRE = /^\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/i; // check timestamp re
 // 增加支持emphasis,colorful 上下标
-export const subSupRE = /(\w+)(\^|_){?([<\w-=:~\+/*>]+)}?/gi;
+export const subSupRE = /([\w-]+)(\^|_){([<\w-=:~\+/*>]+)}/gi;
+export const subSupXRE = /^([\w-]+)(\^|_){([<\w-=:~\+/*>]+)}/;
 
 // table regexp
 export const tableRowRE = /^(\s*)\|(.*?)\|$/;
 export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
 
-const colorNameREStr = `\\w+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
+const colorNameREStr = `\\[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
 export const colorfulTextRE = new RegExp(
   `<(${colorNameREStr}):([^<>]+)>`,
   'gi'

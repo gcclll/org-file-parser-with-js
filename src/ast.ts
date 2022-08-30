@@ -114,9 +114,10 @@ export interface OrgTimestampNode extends OrgBaseNode {
   timestamp: OrgTimestamp;
 }
 
+export type OrgScriptSign = '_' | '^'
 export interface OrgSubSupNode extends OrgBaseNode {
   type: OrgNodeTypes.SUB_SUP;
-  sign: '_' | '^';
+  sign: OrgScriptSign;
   target: string;
   value: string | OrgTextNode; // maybe colorful/emphasis node
   sub?: boolean;

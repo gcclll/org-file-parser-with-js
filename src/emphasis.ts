@@ -52,12 +52,14 @@ export interface OrgNestContext {
 }
 
 // entry function
-export function parseEmphasisNode(content: string): OrgTextChildNode {
-  content = `${content}   `;
+export function parseEmphasisNode(
+  content: string,
+  padSpaces = true
+): OrgTextNode {
+  content = padSpaces ? `${content}   ` : content;
   const context: OrgNestContext = { source: content };
-  const root: OrgEmphasisNode = {
-    type: OrgNodeTypes.EMPHASIS,
-    sign: '' as InlineEmphasisSign,
+  const root: OrgTextNode = {
+    type: OrgNodeTypes.TEXT,
     children: [],
   };
   root.children = parseChildren(context, []);
@@ -146,13 +148,12 @@ function parseChildren(
   const nodes: OrgTextChildNode[] = [];
 
   while (!isEnd(context, ancestors)) {
-    advanceBy(context) // trim start spaces
+    advanceBy(context); // trim start spaces
     const s = context.source;
     let node: OrgTextChildNode | undefined = undefined;
 
-
     if (re.stateXRE.test(s)) {
-      node = parseStateKeyword(context)
+      node = parseStateKeyword(context);
     } else if (isStartTag(s[0]) && s[1] !== ' ') {
       // 处理一些特殊的非嵌套文本
       let jumpOut = false;
@@ -200,11 +201,11 @@ function parseChildren(
 }
 
 function advanceBy(context: OrgNestContext, nn?: number): void {
-  const s = context.source
-  let n = s.length - s.trimStart().length
-  if (nn && nn > 0) n = nn
+  const s = context.source;
+  let n = s.length - s.trimStart().length;
+  if (nn && nn > 0) n = nn;
   if (n > 0) {
-    context.source = s.slice(n)
+    context.source = s.slice(n);
   }
 }
 
