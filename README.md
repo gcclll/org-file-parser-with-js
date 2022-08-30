@@ -73,6 +73,10 @@ LIVE DEMO: https://cheng92.com/demo/org
 
     `_underline before <red:colorfultext> after_`
 
+    Support: `_u1 <red:underline /italic/ c2> u2_`
+
+    Not support: `_u1 <red:underline /it<red:a>lic/ c2> u2_`
+
   * [ ] Special text, `doc:documentation`
 
 * [x] Attribute, `#+title: org-file-parser-with-js`

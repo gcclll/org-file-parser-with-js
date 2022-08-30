@@ -83,7 +83,7 @@ function parseTimeStamp(context: OrgNestContext): OrgTimestampNode {
   };
 }
 
-function parseColorText(context: OrgNestContext): OrgColorfulTextNode {
+export function parseColorText(context: OrgNestContext): OrgColorfulTextNode {
   let s = context.source;
   const [text, color, value] = re.colorfulTextXRE.exec(s) || [];
   context.source = s.slice(text.length);
@@ -165,13 +165,10 @@ function parseChildren(
         }
       } else if (s[0] === '<') {
         jumpOut = true;
-        console.log({ s, x: re.colorfulTextXRE.test(s), r: re.colorfulTextXRE })
         if (s[1] === '<' && re.innerLinkXRE.test(s)) {
           node = parseInnerLink(context);
         } else if (re.timestampXRE.test(s)) {
           node = parseTimeStamp(context);
-        } else if (re.colorfulTextXRE.test(s)) {
-          node = parseColorText(context);
         } else {
           jumpOut = false;
         }
