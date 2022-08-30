@@ -1,233 +1,30 @@
-export const isArray = Array.isArray;
-
-export interface OrgParserOptions {
-  onError: (error: Error) => void;
-}
-
-export enum OrgStates {
-  DONE = 'DONE',
-  DOING = 'DOING',
-  WAITING = 'WAITING',
-  CANCELLED = 'CANCELLED',
-  SCHEDULED = 'SCHEDULED',
-}
-
-export enum OrgNodeTypes {
-  ROOT, // 根节点
-  TEXT, // pure text
-  PROPERTY, // #+...
-  HEADER, // ** ...
-  BLOCK, // #+begin...#+end
-
-  EMPHASIS, // =,_,/,+,$,[!&%@]{2}
-  LIST, // - [-], 1. ...
-  TIMESTAMP, // <2022-11-12 Wed 12:00>
-  LINK, // external: [[url][name]], inner: <<meta_id>>
-  STATE, // TODO, DONE, etc.
-
-  SUB_SUP, // 下标或上标
-  COLORFUL_TEXT, // 带颜色的文本
-  TABLE, // 表格
-}
-
-export interface OrgRootNode {
-  type: OrgNodeTypes.ROOT;
-  children: OrgValidNode[];
-  properties?: OrgAttribute[]; // 页面属性，如：$+title: title value
-  footnotes?: OrgFootNode[];
-  options?: OrgParserOptions;
-}
-
-export type OrgTextChildNode =
-  | OrgTextNode
-  | OrgLinkNode
-  | OrgEmphasisNode
-  | OrgTimestampNode
-  | OrgLinkNode
-  | OrgStateNode
-  | OrgSubSupNode
-  | OrgColorfulTextNode;
-
-export type OrgValidNode =
-  | OrgPropertyNode
-  | OrgHeaderNode
-  | OrgBlockNode
-  | OrgListNode
-  | OrgTextChildNode
-  | OrgTableNode;
-
-export interface OrgBaseNode {
-  indent?: number;
-  content?: string | OrgTextChildNode;
-  children?: OrgTextChildNode[];
-}
-
-export type OrgTableRowType = Record<string, string>;
-
-export interface OrgTableColumn {
-  label: string;
-  prop: string;
-}
-// 第一行必需是表头，用表头的列内容做为对象的 key
-// 如：|name|value|
-//     |cat|100|
-// 结果：[['name', 'value], ['cat', '100']]
-//
-export interface OrgTableNode extends OrgBaseNode {
-  type: OrgNodeTypes.TABLE;
-  nodes: OrgTableRowType[];
-  columns: Array<OrgTableColumn>;
-  rows: number;
-  name?: string;
-}
-
-export interface OrgStateNode extends OrgBaseNode {
-  type: OrgNodeTypes.STATE;
-  state: OrgStates;
-}
-
-export interface OrgPairNode<T> extends OrgBaseNode {
-  name: string;
-  value: T;
-}
-
-export interface OrgFootNode extends OrgPairNode<string> {}
-
-export interface OrgTextNode extends OrgBaseNode {
-  type: OrgNodeTypes.TEXT;
-}
-
-export interface OrgColorfulTextNode extends OrgBaseNode {
-  type: OrgNodeTypes.COLORFUL_TEXT;
-  color: string;
-}
-
-export interface OrgTimestamp {
-  year: string;
-  month: string;
-  day: string;
-  week?: string;
-  time?: string;
-  dein?: string; // [+-]\d[wdmy] -> week/day/month/year
-}
-
-export interface OrgTimestampNode extends OrgBaseNode {
-  type: OrgNodeTypes.TIMESTAMP;
-  timestamp: OrgTimestamp;
-}
-
-export interface OrgSubSupNode extends OrgBaseNode {
-  type: OrgNodeTypes.SUB_SUP;
-  sign: '_' | '^';
-  target: string;
-  value: string | OrgTextNode; // maybe colorful/emphasis node
-  sub?: boolean;
-  sup?: boolean;
-}
-
-export interface OrgPropertyNode extends OrgPairNode<string | boolean> {
-  type: OrgNodeTypes.PROPERTY;
-}
-
-export interface OrgClockValue {
-  start: OrgTimestamp | string;
-  end?: OrgTimestamp | string;
-  duration?: string;
-}
-
-export type OrgHeaderProperty = OrgPairNode<OrgHeaderPropertyValue> & {
-  category?: string;
-};
-export type OrgHeaderPropertyValue = string | OrgTimestamp | OrgClockValue;
-export interface OrgHeaderNode extends OrgBaseNode {
-  type: OrgNodeTypes.HEADER;
-  title: string | OrgTextChildNode;
-  level: number;
-  tags?: string[];
-  properties?: OrgHeaderProperty[];
-}
-
-export interface OrgAttribute extends OrgPairNode<string | boolean> {}
-
-export interface OrgLinkNode extends OrgBaseNode {
-  type: OrgNodeTypes.LINK;
-  linkType: 'external' | 'inner'; // external: [[url][desc]], inner: <<meta_id>>
-  url: string;
-  description?: string;
-  abbrev?: string; // [[url:abbrev][description]]
-}
-
-export type OrgBlockOptions = OrgAttribute[];
-export interface OrgBlockNode extends OrgBaseNode {
-  type: OrgNodeTypes.BLOCK;
-  name: string;
-  code: string | OrgTextNode;
-  lang?: string;
-  attributes?: OrgAttribute[];
-  options?: OrgBlockOptions;
-}
-
-export declare type OrgListItemState = ' ' | '-' | 'x' | 'X';
-export interface OrgListNode extends OrgBaseNode {
-  type: OrgNodeTypes.LIST;
-  name: string; // 无序：-/+, 有序：1)/a)/1./a.
-  isOrder: boolean; // 有序列表/无序列表
-  state: OrgListItemState;
-}
-
-export enum InlineEmphasisSign {
-  CODE_EQUAL = '=',
-  CODE_WAVE = '~',
-  LINE_THROUGH = '+',
-  UNDERLINE = '_',
-  ITALIC = '/',
-  BOLD = '*',
-  LATEX = '$',
-}
-
-export interface OrgEmphasisNode extends OrgBaseNode {
-  type: OrgNodeTypes.EMPHASIS;
-  sign: InlineEmphasisSign;
-}
-
-export const SIGN_SUB = '_';
-export const SIGN_SUP = '^';
-
-// 正则表达式
-export const propertyRE = /^(\s*)#\+(?!begin|end)([\w-_]+)\s*:(.*)$/i;
-export const headerRE = /^(\*+)\s+(.*)$/i;
-export const blockRE =
-  /^(\s*)#\+begin_([\w-]+)\s+([\w-]+)\s+(:[^\n]+\n)\s*(.*)#\+end_(\2)/i;
-export const blockBeginRE = /^(\s*)#\+begin_([\w-]+)(\s+[\w-]+)?(\s+.*)?/;
-export const blockEndRE = /^(\s*)#\+end_([\w-]+)$/;
-export const blockOptionsRE = /-(\w)\s([^-]+)?/gi;
-export const unorderListRE = /^(\s*)(-|\+|\s+\*)\s+(\[[-x ]\]\s+)?(.*)$/;
-export const orderListRE = /^(\s*)([\d\w]+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
-export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
-export const innerLinkRE = /<<([^<>]+)>>/g;
-export const emphasisRE =
-  /([=~\+_/\$\*]|[!&%@][!&%@])(?=[^\s])([^\1]+?\S)(?:\1)/g;
-export const timestampRE = /\<(\d{4}-\d{2}-\d{2}\s+[^>]+)>/gi; // check timestamp re
-// 增加支持emphasis,colorful 上下标
-export const subSupRE = /(\w+)(\^|_){?([<\w-=:~\+/*>]+)}?/gi;
-
-// table regexp
-export const tableRowRE = /^(\s*)\|(.*?)\|$/;
-export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
-
-const colorNameREStr = `\\w+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
-export const colorfulTextRE = new RegExp(
-  `<(${colorNameREStr}):([^<>]+)>`,
-  'gi'
-);
-// FIX: 支持完整字符串为: `red:text` 格式
-export const colorfulBareTextRE = new RegExp(
-  `\\s+(${colorNameREStr}):([^\\s]+)\\s+`,
-  'gi'
-);
-
-const states = ['TODO', 'DONE', 'CANCELLED'];
-export const stateRE = new RegExp(`(${Object.keys(states)})`, 'g');
+import {
+  OrgParserOptions,
+  OrgAttribute,
+  OrgBlockNode,
+  OrgBlockOptions,
+  OrgEmphasisNode,
+  InlineEmphasisSign,
+  OrgListNode,
+  OrgListItemState,
+  OrgHeaderNode,
+  OrgHeaderProperty,
+  OrgClockValue,
+  OrgPropertyNode,
+  OrgSubSupNode,
+  OrgTimestamp,
+  OrgTextNode,
+  OrgTableNode,
+  OrgTableRowType,
+  OrgValidNode,
+  OrgTextChildNode,
+  OrgRootNode,
+  OrgNodeTypes,
+  SIGN_SUB,
+} from './ast';
+import * as re from './regexp';
+import { parseEmphasisNode } from './emphasis'
+import { matchTimestamp, findIndex } from './utils';
 
 export function baseParse(
   source: string,
@@ -265,17 +62,17 @@ function parseNode(
 ): OrgValidNode | undefined {
   let node: OrgValidNode | undefined;
 
-  if (tableRowRE.test(source)) {
+  if (re.tableRowRE.test(source)) {
     node = parseTable(source, list, index);
-  } else if (blockBeginRE.test(source)) {
+  } else if (re.blockBeginRE.test(source)) {
     node = parseBlock(source, list, index);
-  } else if (propertyRE.test(source)) {
+  } else if (re.propertyRE.test(source)) {
     node = parseProperty(source, list, index);
-  } else if (headerRE.test(source)) {
+  } else if (re.headerRE.test(source)) {
     node = parseHeader(source, list, index);
-  } else if (unorderListRE.test(source)) {
+  } else if (re.unorderListRE.test(source)) {
     node = parseList(source, list, index, false);
-  } else if (orderListRE.test(source)) {
+  } else if (re.orderListRE.test(source)) {
     node = parseList(source, list, index, true);
   } else {
     node = undefined;
@@ -306,9 +103,9 @@ function parseTable(
     }
 
     // 使用 tableRowRE 变量的话会存在正则记录 lastIndex 问题
-    if (tableRowLineRE.test(s)) {
+    if (re.tableRowLineRE.test(s)) {
       // nodes.push(true);
-    } else if (tableRowRE.test(s)) {
+    } else if (re.tableRowRE.test(s)) {
       const ss = s.replace(/^\||\|$/g, '');
       const values = ss.split('|').map((s) => s.trim());
       if (!firstRow) {
@@ -353,9 +150,9 @@ function parseList(
   index: number,
   isOrder: boolean
 ): OrgListNode {
-  const re = isOrder ? orderListRE : unorderListRE;
+  const _re = isOrder ? re.orderListRE : re.unorderListRE;
   const [, indent = '', name = '', state = '', text = ''] =
-    re.exec(source) || [];
+    _re.exec(source) || [];
 
   return {
     type: OrgNodeTypes.LIST,
@@ -384,23 +181,23 @@ export function parseTextWithNode(
   const reParserMap: Array<[RegExp, (node: OrgTextNode) => OrgTextChildNode]> =
     [
       // parse timestamp text, 如：<2022-11-11 20:00>
-      [timestampRE, parseTimestamp],
+      [re.timestampRE, parseTimestamp],
       // parse external links(inc. image) in text, 如：[[desc][link]]
-      [extLinkRE, parseExternalLink],
+      [re.extLinkRE, parseExternalLink],
       // parse inner links, 如：<<meta-id>>
-      [innerLinkRE, parseInnerLink],
+      [re.innerLinkRE, parseInnerLink],
       // parse state keywords(eg. TODO, DONE, CANCELLED)
-      [stateRE, parseStateKeywords],
+      [re.stateRE, parseStateKeywords],
       // parse sub or sup text, 如：header_sub 或 header_{sub}
-      [subSupRE, parseSubSupText],
+      [re.subSupRE, parseSubSupText],
       // parse colorful text, 如：<red:red text>
-      [colorfulTextRE, parseColorfulText],
+      [re.colorfulTextRE, parseColorfulText],
       // parse colorful bare text, 如：red:red-text
-      [colorfulBareTextRE, parseColorfulBareText],
+      [re.colorfulBareTextRE, parseColorfulBareText],
       // parse emphasis text, 如：_underline_, *border*, /italic/,...
       // 必需放到最后，因为 emphasis 中的一些符号可能会被用在其它特殊文本中
       // 代表其它含义，比如：标题中的上下标的使用时就不应该首先被解析成emphasis
-      [emphasisRE, parseEmphasisText],
+      [re.emphasisRE, parseEmphasisText],
     ];
 
   // 需要递归进行解析，因此需要保证每个函数都能被执行到
@@ -445,9 +242,8 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
 
 // red:xxxx
 export function parseColorfulBareText(node: OrgTextNode) {
-  return parseTextExtra(node, colorfulBareTextRE, (values: string[]) => {
+  return parseTextExtra(node, re.colorfulBareTextRE, (values: string[]) => {
     const [, color, text] = values;
-    console.log({ color, text, values });
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
       color,
@@ -459,7 +255,7 @@ export function parseColorfulBareText(node: OrgTextNode) {
 
 // <red:xxx yyy>
 export function parseColorfulText(node: OrgTextNode) {
-  return parseTextExtra(node, colorfulTextRE, (values: string[]) => {
+  return parseTextExtra(node, re.colorfulTextRE, (values: string[]) => {
     const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
@@ -471,7 +267,7 @@ export function parseColorfulText(node: OrgTextNode) {
 }
 
 export function parseSubSupText(node: OrgTextNode) {
-  return parseTextExtra(node, subSupRE, (values: string[]) => {
+  return parseTextExtra(node, re.subSupRE, (values: string[]) => {
     const [, target, sign, value] = values;
     const o = {
       target,
@@ -489,19 +285,19 @@ export function parseSubSupText(node: OrgTextNode) {
 }
 
 export function parseStateKeywords(node: OrgTextNode) {
-  return parseTextExtra(node, stateRE, (values: string[]) => {
+  return parseTextExtra(node, re.stateRE, (values: string[]) => {
     return { type: OrgNodeTypes.STATE, state: values[1] as any };
   });
 }
 
 export function parseInnerLink(node: OrgTextNode) {
-  return parseTextExtra(node, innerLinkRE, (values: string[]) => {
+  return parseTextExtra(node, re.innerLinkRE, (values: string[]) => {
     return { type: OrgNodeTypes.LINK, linkType: 'inner', url: values[1] };
   });
 }
 
 export function parseExternalLink(node: OrgTextNode) {
-  return parseTextExtra(node, extLinkRE, (values: string[]) => {
+  return parseTextExtra(node, re.extLinkRE, (values: string[]) => {
     const [, url, description] = values;
     const trimUrl = url.trim();
     // [[url:abbrev][description]]
@@ -521,21 +317,22 @@ export function parseExternalLink(node: OrgTextNode) {
 }
 
 export function parseTimestamp(node: OrgTextNode) {
-  return parseTextExtra(node, timestampRE, (values: string[]) => {
+  return parseTextExtra(node, re.timestampRE, (values: string[]) => {
     const timestamp: OrgTimestamp = matchTimestamp(values[1]) as OrgTimestamp;
     return { timestamp, type: OrgNodeTypes.TIMESTAMP };
   });
 }
 
 export function parseEmphasisText(node: OrgTextNode) {
-  return parseTextExtra(node, emphasisRE, (values: string[]) => {
+  return parseTextExtra(node, re.emphasisRE, (values: string[]) => {
     const [, sign, matchValue] = values;
+    console.log({ matchValue });
     const node: OrgEmphasisNode = {
       type: OrgNodeTypes.EMPHASIS,
       sign: sign as InlineEmphasisSign,
       content: matchValue,
     };
-    const nested = parseNestedEmphasisNode(values[0]);
+    const nested = parseEmphasisNode(values[0]);
     node.children = nested.children;
     return node;
   });
@@ -546,7 +343,7 @@ function parseBlock(
   list: string[],
   index: number
 ): OrgBlockNode | undefined {
-  const matched = blockBeginRE.exec(source);
+  const matched = re.blockBeginRE.exec(source);
 
   if (!matched) {
     return;
@@ -557,7 +354,7 @@ function parseBlock(
   // TODO 解决嵌套问题
   for (i = index + 1; i < list.length; i++) {
     const next = list[i];
-    if (next?.match(blockEndRE)) {
+    if (next?.match(re.blockEndRE)) {
       break;
     }
   }
@@ -624,7 +421,7 @@ function parseCLIOption(s: string): OrgBlockOptions {
 
   let result;
   let nodes: OrgBlockOptions = [];
-  while ((result = blockOptionsRE.exec(s))) {
+  while ((result = re.blockOptionsRE.exec(s))) {
     const [, name, value = ''] = result;
     if (name) {
       nodes.push({
@@ -642,7 +439,7 @@ function parseProperty(
   _: string[],
   __: number
 ): OrgPropertyNode | undefined {
-  const matched = source.match(propertyRE);
+  const matched = source.match(re.propertyRE);
   if (matched) {
     const [, , name, value = ''] = matched;
     return {
@@ -661,7 +458,7 @@ function parseHeader(
   index: number
 ): OrgHeaderNode | undefined {
   const { content, tags } = parseTags(source);
-  const matched = content.match(headerRE);
+  const matched = content.match(re.headerRE);
 
   if (!matched) return;
 
@@ -706,7 +503,7 @@ function parseHeadProperty(startIndex: number, list: string[]) {
   const multiPropertyRE = /\s*:([A-Z]+):/; // LOGBOOK, PROPERTIES
   for (let i = startIndex; i < list.length; i++) {
     const next = list[i];
-    if (headerRE.test(next)) break;
+    if (re.headerRE.test(next)) break;
 
     let matched;
     if (multiPropertyRE.test(next)) {
@@ -774,36 +571,6 @@ function parseTags(content: string): {
     tags,
     content,
   };
-}
-
-export function matchTimestamp(timestamp: string): OrgTimestamp | string {
-  const re =
-    /((?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})|(?<week>\w{3})|(?<time>\d{2}:\d{2}(-\d{2}:\d{2})?)|(?<dein>[-+]\d+[wydm]))/gi;
-
-  let result: OrgTimestamp = { year: '', month: '', day: '' };
-  for (const match of timestamp.matchAll(re)) {
-    const gs = match.groups;
-    if (gs) {
-      Object.keys(gs).forEach((key) => {
-        if (gs[key]) result[key as keyof OrgTimestamp] = gs[key];
-      });
-    }
-  }
-
-  const { year, month, day } = result;
-  if (!year && !month && !day) {
-    return timestamp.trim();
-  }
-
-  return result;
-}
-
-function findIndex(
-  list: Array<any>,
-  callback: (element: any, index: number, list: Array<any>) => any,
-  fromIndex: number = 0
-) {
-  return list.slice(fromIndex).findIndex(callback);
 }
 
 // parse something in text node
@@ -897,169 +664,4 @@ function parseClockValue(value: string): OrgClockValue | string {
   }
 
   return value;
-}
-
-/////////////////////// parse nested ///////////////////////////////////////
-/////////// 代码参考 vue-next/packages/compiler-core/src/parser.ts //////////
-const tagMap: Record<string, string> = {
-  _: '_',
-  '<': '>',
-  '+': '+',
-};
-
-export function last<T>(xs: T[]): T | undefined {
-  return xs[xs.length - 1];
-}
-
-function isStartTag(ch: string): boolean {
-  return Object.keys(tagMap).includes(ch);
-}
-
-function isEndTag(ch: string): boolean {
-  return Object.values(tagMap).includes(ch);
-}
-
-export interface OrgNestContext {
-  source: string;
-}
-
-export function parseNestedEmphasisNode(content: string): OrgTextChildNode {
-  content = `${content}   `;
-  const context: OrgNestContext = { source: content };
-  const root: OrgEmphasisNode = {
-    type: OrgNodeTypes.EMPHASIS,
-    sign: '' as InlineEmphasisSign,
-    children: [],
-  };
-  root.children = parseChildren(context, []);
-  root.children = root.children.filter((child) => {
-    if (typeof child.content === 'string') {
-      return child.content.trim() !== '';
-    }
-    return true;
-  });
-  return root;
-}
-
-function parseChildren(
-  context: OrgNestContext,
-  ancestors: OrgTextChildNode[]
-): OrgTextChildNode[] {
-  const nodes: OrgTextChildNode[] = [];
-
-  while (!isEnd(context, ancestors)) {
-    const s = context.source;
-    let node: OrgTextChildNode | undefined = undefined;
-
-    if (isStartTag(s[0]) && s[1] !== ' ') {
-      node = parseElement(context, ancestors);
-    } else if (isEndTag(s[0])) {
-      context.source = context.source.slice(1);
-      continue;
-    }
-
-    if (!node) {
-      node = parseNestText(context);
-    }
-
-    if (isArray(node)) {
-      for (let i = 0; i < node.length; i++) {
-        pushNode<OrgTextChildNode>(nodes, node[i]);
-      }
-    } else {
-      pushNode<OrgTextChildNode>(nodes, node);
-    }
-  }
-
-  return nodes;
-}
-
-function parseElement(
-  context: OrgNestContext,
-  ancestors: OrgTextChildNode[]
-): OrgEmphasisNode {
-  const s = context.source;
-  const tag = s[0];
-  context.source = s.trimStart().slice(1);
-  const element: OrgEmphasisNode = {
-    type: OrgNodeTypes.EMPHASIS,
-    sign: tag as InlineEmphasisSign,
-    children: [],
-  };
-
-  ancestors.push(element);
-  const children = parseChildren(context, ancestors);
-  ancestors.pop();
-
-  element.children = children;
-
-  const endTag = tagMap[element.sign];
-  if (startsWith(context.source, endTag)) {
-    context.source = context.source.slice(1);
-  }
-
-  return element;
-}
-
-const endTokens: string[] = ['_', '>', '+', '<'];
-
-function parseNestText(context: OrgNestContext): OrgTextNode {
-  const s = context.source;
-  let endIndex = s.length;
-
-  for (let i = 0; i < endTokens.length; i++) {
-    const index = s.indexOf(endTokens[i], 1);
-    if (index !== -1 && endIndex > index) {
-      endIndex = index;
-    }
-  }
-
-  const content = s.slice(0, endIndex);
-  context.source = s.slice(endIndex);
-
-  return {
-    type: OrgNodeTypes.TEXT,
-    content,
-  };
-}
-
-function pushNode<T>(nodes: T[], node: T): void {
-  nodes.push(node);
-}
-
-function isEnd(
-  context: OrgNestContext,
-  ancestors: OrgTextChildNode[]
-): boolean {
-  const s = context.source;
-  const tags = Object.entries(tagMap);
-  for (let i = 0; i < tags.length; i++) {
-    const [start, end = start] = tags[i];
-    if (checkIsEnd(s, ancestors, start, end)) {
-      return true;
-    }
-  }
-
-  return !s;
-}
-
-function checkIsEnd(
-  s: string,
-  ancestors: OrgTextChildNode[],
-  startTag: string,
-  endTag = startTag
-): boolean {
-  if (startsWith(s, endTag)) {
-    for (let i = ancestors.length - 1; i >= 0; --i) {
-      const c = ancestors[i];
-      if ('sign' in c && c.sign === startTag) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function startsWith(s1: string, s2: string): boolean {
-  return s1.startsWith(s2);
 }

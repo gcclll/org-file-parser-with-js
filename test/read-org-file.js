@@ -1,9 +1,8 @@
 const fs = require('fs');
-const { baseParse, parseNestedEmphasisNode: parse2 } = require('../dist/');
+const { baseParse, parseEmphasisNode: parse2 } = require('../dist/');
 
 const log = console.log;
 const ast = parse2(`_text1 <red:emphasis1-emphasis2> text2_`)
-console.log(ast.children[0], 20000)
 fs.readFile('./demo.org', (err, data) => {
   if (err) {
     console.warn(err);
@@ -15,7 +14,7 @@ fs.readFile('./demo.org', (err, data) => {
 
     fs.writeFile(
       './org.js',
-      `window.$json=${JSON.stringify(nodes)}`,
+      `window.$json=${JSON.stringify(nodes)};window.$ast=${JSON.stringify(ast)};`,
       (err) => {
         console.log('write error', err);
       }
