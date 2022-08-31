@@ -270,7 +270,7 @@ export function parseColorfulBareText(node: OrgTextNode) {
     const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,
-      color,
+      color: color.trim(),
       content: text as any, //parseText(text, 0),
       indent: 0,
     };

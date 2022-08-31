@@ -39,7 +39,7 @@ export const colorfulTextXRE = new RegExp(
 );
 // FIX: 支持完整字符串为: `red:text` 格式
 export const colorfulBareTextRE = new RegExp(
-  `\\s+(${colorNameREStr}):([^\\s<>]+)\\s+`,
+  `(\\s+${colorNameREStr}):([^\\s<>]+)\\s+`,
   'gi'
 );
 
