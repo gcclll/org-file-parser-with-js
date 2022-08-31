@@ -182,6 +182,7 @@ export enum InlineEmphasisSign {
   ITALIC = '/',
   BOLD = '*',
   LATEX = '$',
+  ANGLE = '<',
 }
 
 export interface OrgEmphasisNode extends OrgBaseNode {

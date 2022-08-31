@@ -1,3 +1,4 @@
+export * from './utils'
 export * from './ast'
 export * from './regexp'
 export * from './emphasis'

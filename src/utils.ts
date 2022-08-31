@@ -1,5 +1,8 @@
 import { OrgTimestamp } from './ast';
 
+const toString = Object.prototype.toString
+export const assign = Object.assign
+export const isString = (v: any) => toString.call(v) === '[object String]'
 export const isArray = Array.isArray;
 
 export function matchTimestamp(timestamp: string): OrgTimestamp | string {
@@ -30,4 +33,16 @@ export function findIndex(
   fromIndex: number = 0
 ) {
   return list.slice(fromIndex).findIndex(callback);
+}
+
+export function traverse(root: any, cb: (node: any) => void): void {
+  const children = root.children;
+
+  if (children?.length) {
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
+      cb(child)
+      traverse(child, cb);
+    }
+  }
 }

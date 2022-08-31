@@ -21,7 +21,8 @@ import {
 } from './ast';
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
-import { matchTimestamp, findIndex } from './utils';
+import { matchTimestamp, findIndex, traverse } from './utils';
+import { transformColorText } from './transform'
 
 export function baseParse(
   source: string,
@@ -43,13 +44,24 @@ export function baseParse(
 
   nodes = nodes.filter((node: OrgValidNode) => node && node.content !== '');
 
-  return {
+  const root: OrgRootNode = {
     type: OrgNodeTypes.ROOT,
     children: nodes,
     properties: [],
     footnotes: [],
     options,
-  };
+  }
+
+  traverse(root, (node: OrgValidNode) => {
+    if (node.type === OrgNodeTypes.EMPHASIS) {
+      // 处理 content 中包含 red:text 的文本，因为 emphasis.ts 中会将
+      // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
+      // 成 EMPHASIS 节点。
+      transformColorText(node)
+    }
+  })
+
+  return root;
 }
 
 function parseNode(
