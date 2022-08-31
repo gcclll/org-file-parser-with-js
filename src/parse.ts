@@ -195,6 +195,7 @@ export function parseTextWithNode(
       [re.subSupRE, parseSubSupText],
       // parse colorful bare text, 如：red:red-text
       [re.colorfulBareTextRE, parseColorfulBareText],
+      [re.colorfulBareTextBeginRE, parseColorfulBareText],
     ];
 
   // 需要递归进行解析，因此需要保证每个函数都能被执行到

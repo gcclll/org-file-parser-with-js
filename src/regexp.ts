@@ -43,6 +43,10 @@ export const colorfulBareTextRE = new RegExp(
   'gi'
 );
 
+export const colorfulBareTextBeginRE = new RegExp(
+  `^(${colorNameREStr}):([^\\s<>]+)\\s+`,
+  'gi'
+);
 const states = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
 export const stateXRE = new RegExp(`^(${states.join('|')})`);
