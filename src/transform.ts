@@ -1,6 +1,6 @@
 import { OrgEmphasisNode, OrgNodeTypes } from './ast';
 import { isString, assign } from './utils';
-import { colorfulBareTextBeginRE } from './regexp';
+import { colorTextRE } from './regexp';
 import { parseEmphasisNode } from './emphasis';
 
 export function transformColorText(node: OrgEmphasisNode): void {
@@ -8,7 +8,7 @@ export function transformColorText(node: OrgEmphasisNode): void {
     const [first] = node.children || [];
     if (first && first.type === OrgNodeTypes.TEXT) {
       const s = first.content as string;
-      if (isString(s) && colorfulBareTextBeginRE.test(s + ' ')) {
+      if (isString(s) && colorTextRE.bareBegin.test(s + ' ')) {
         const idx = s.indexOf(':');
         if (idx > 0) {
           const color = s.substring(0, idx);

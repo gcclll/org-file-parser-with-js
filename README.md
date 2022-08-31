@@ -67,8 +67,11 @@ LIVE DEMO: https://cheng92.com/demo/org
 * [x] Text
 
   * [x] Colorful text, `<red:text1 text2>` or `red:text1text2`
-    * [ ] TODO Support emphasis text, `<red:text1 _text2_>`
-
+    
+    Without `<>`, only support simple syntax，if want to use complex colorful text, use  `<...>` instead.
+    
+    * [x] Support emphasis text, `<red:text1 _text2_>`
+    
   * [x] Nested emphasis node
 
     `_underline before <red:colorfultext> after_`

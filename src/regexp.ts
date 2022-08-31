@@ -26,27 +26,20 @@ export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
 
 const colorNameREStr = `[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
 
-export const colorfulTextRE = new RegExp(
-  `<(${colorNameREStr}):([^<>]+)>`,
-  'gi'
-);
+// shit????????????, global 用来遍历找出结果，无global的用来检查是否匹配正则
+export const colorTextRE = {
+  // 找出所有 <red:text> 文本时使用
+  angleGlobal: new RegExp(`<(${colorNameREStr}):([^<>]+)>`, 'gi'),
+  // 在检查是不是 `<red:text .. bala...>` 开头的文本
+  angleBegin: new RegExp(`^<(${colorNameREStr}):([^<>]+)>`, 'i'),
+  // 找出所有 `xxx red:text-...` 文本时使用
+  bareGlobal: new RegExp(`(\\s+${colorNameREStr}):([^\\s<>]+)\\s+`, 'gi'),
+  // 找出所有 `red:text...` 开头的文本
+  bareBeginGlobal: new RegExp(`^(${colorNameREStr}):([^\\s<>]+)\\s+`, 'gi'),
+  // 检查是不是 `red:text... text ...` 开头的文本
+  bareBegin: new RegExp(`^(${colorNameREStr}):([^\\s<>]+)\\s+`, 'i'),
+};
 
-// TODO 不支持太复杂的嵌套，如：_u1 <red:underline /it<red:a>lic/ c2> u2_
-// 其中的 <red:a> 就解析不出来
-export const colorfulTextXRE = new RegExp(
-  `^<(${colorNameREStr}):([^<>]+)>`,
-  'i'
-);
-// FIX: 支持完整字符串为: `red:text` 格式
-export const colorfulBareTextRE = new RegExp(
-  `(\\s+${colorNameREStr}):([^\\s<>]+)\\s+`,
-  'gi'
-);
-
-export const colorfulBareTextBeginRE = new RegExp(
-  `^(${colorNameREStr}):([^\\s<>]+)\\s+`,
-  'gi'
-);
 const states = ['TODO', 'DONE', 'CANCELLED'];
 export const stateRE = new RegExp(`(${states.join('|')})`, 'g');
 export const stateXRE = new RegExp(`^(${states.join('|')})`);

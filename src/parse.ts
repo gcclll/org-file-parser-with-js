@@ -194,8 +194,8 @@ export function parseTextWithNode(
       // parse sub or sup text, 如：header_sub 或 header_{sub}
       [re.subSupRE, parseSubSupText],
       // parse colorful bare text, 如：red:red-text
-      [re.colorfulBareTextRE, parseColorfulBareText],
-      [re.colorfulBareTextBeginRE, parseColorfulBareText],
+      [re.colorTextRE.bareGlobal, parseColorfulBareText],
+      [re.colorTextRE.bareBeginGlobal, parseColorfulBareText],
     ];
 
   // 需要递归进行解析，因此需要保证每个函数都能被执行到
@@ -267,7 +267,7 @@ function parseText(source: string, _: string[], __: number): OrgTextNode {
 
 // red:xxxx
 export function parseColorfulBareText(node: OrgTextNode) {
-  return parseTextExtra(node, re.colorfulBareTextRE, (values: string[]) => {
+  return parseTextExtra(node, re.colorTextRE.bareGlobal, (values: string[]) => {
     const [, color, text] = values;
     return {
       type: OrgNodeTypes.COLORFUL_TEXT,

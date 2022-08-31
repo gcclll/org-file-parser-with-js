@@ -10,7 +10,8 @@ export function matchTimestamp(timestamp: string): OrgTimestamp | string {
     /((?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})|(?<week>\w{3})|(?<time>\d{2}:\d{2}(-\d{2}:\d{2})?)|(?<dein>[-+]\d+[wydm]))/gi;
 
   let result: OrgTimestamp = { year: '', month: '', day: '' };
-  for (const match of timestamp.matchAll(re)) {
+  const matches = Array.from(timestamp.matchAll(re))
+  for (const match of matches) {
     const gs = match.groups;
     if (gs) {
       Object.keys(gs).forEach((key) => {
