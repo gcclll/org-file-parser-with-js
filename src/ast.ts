@@ -188,6 +188,7 @@ export enum InlineEmphasisSign {
 export interface OrgEmphasisNode extends OrgBaseNode {
   type: OrgNodeTypes.EMPHASIS;
   sign: InlineEmphasisSign;
+  extra?: boolean;
 }
 
 export const SIGN_SUB = '_';

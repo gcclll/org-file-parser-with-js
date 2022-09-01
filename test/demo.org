@@ -55,6 +55,16 @@ _red:text1-text2_
 
 text green:text-green text2
 
+** Extra Special Text
+
+!!test!! !@test!@ !%test!% !&test!&
+
+@!test@! @@test@@ @%test@% @&test@&
+
+%!test%! %@test%@ %%test%% %&test%&
+
+&!test&! &@test&@ &%test&% &&test&&
+
 * Textbox
 #+begin_textbox
 test box
