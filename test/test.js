@@ -9,6 +9,115 @@ text = `red:text`
 text = `in red:text other text`
 text = `text1 !!text2!! text3`
 // text = `in <red:text> other text`
+text = `#+title: test
+#+author: gcclll
+#+email: gccll.love@gmail.com
+
+* Table
+
+| name    | value |
+|---------+-------|
+| default | since |
+| 222     | 1111  |
+
+* Blocks
+
+Javascript:
+
+#+begin_src javascript
+function test() {
+   console.log('hello world!')
+}
+#+end_src
+
+Emacs Lisp:
+
+#+begin_src emacs-lisp
+(message "hello world!")
+#+end_src
+
+* Colorful text
+
+<red:text1 text2>
+
+#ccc:i #666666:should red:text1 green:text cyan:between yellow:texts.
+
+** Awesome font family
+
+You can self-define any style text.
+
+!!xxxx!! !@xxx!@ !%xxx!% !&x!&
+
+@!xxx@! @@xxx@@ @%xxx@% @&xxx@&
+
+%!xxx%! %@xxx%@ %%xxx%% %&xxx%&
+
+&!xxx&! &@xxx&@ &%xxx&% &&xxx&&
+
+** Emphasis text
+
+bold: *bold text*
+
+italic: /italic text/
+
+delete: +line through+
+
+underline: _underline_
+* Text Node
+I'am test test!!!!
+
+<2022-02-12 18:00 Wed +1d> test <2033-03-13 22:00> test !!xxx!!
+
+I'm an image link [[a.png]], you can display it in org file.
+
+
+* Links
+inner link: <<test>> ???
+
+link with abbrev: [[d.png:d-img][description]] ???
+* keywords
+keywords: TODO, DONE, CANCELLED, ???
+
+* List
+
+Orderless List:
+
+- orderless list item 1
+- orderless list item 2
+
+Order List:
+
+1. order list item 1
+2. order list item 2
+
+
+* textbox
+
+#+begin_textbox
+test box
+
+!!test!! !@test!@ !%test!% !&test!&
+
+@!test@! @@test@@ @%test@% @&test@&
+
+%!test%! %@test%@ %%test%% %&test%&
+
+&!test&! &@test&@ &%test&% &&test&&
+
+
+#+end_textbox
+
+* sub & sup scripts
+
+suptext^sup xxxx text subtext_sub jjjjkkkj
+
+* TODO header1^{sup}  xx_{sub} :tag1:tag2:emacs:vue:react:
+DEADLINE: <2022-07-06 Wed>
+:PROPERTIES:
+:STYLE: .test{color:red}
+:END:
+`
+// text = `!@xx!@`
 const ast = parse(text)
 // traverse(ast, (node) => {
 //   console.log(node)

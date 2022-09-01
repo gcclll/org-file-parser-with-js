@@ -262,7 +262,7 @@ function parseNestText(context: OrgNestContext): OrgTextNode {
 
   for (let i = 0; i < endTokens.length; i++) {
     const token = endTokens[i];
-    const index = s.indexOf(token, token.length);
+    const index = s.indexOf(token);
     if (index !== -1 && endIndex > index) {
       endIndex = index;
     }
