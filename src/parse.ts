@@ -21,7 +21,7 @@ import {
 } from './ast';
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
-import { matchTimestamp, findIndex, traverse } from './utils';
+import { matchTimestamp, findIndex, traverse, isString } from './utils';
 import { transformColorText } from './transform'
 
 export function baseParse(
@@ -58,6 +58,10 @@ export function baseParse(
       // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
       // 成 EMPHASIS 节点。
       transformColorText(node)
+    } else if (node.type === OrgNodeTypes.BLOCK) {
+      if (node.name === 'textbox' && isString(node.code)) {
+        node.code = parseEmphasisNode(node.code as string)
+      }
     }
   })
 
