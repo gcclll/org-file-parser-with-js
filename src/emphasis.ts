@@ -228,11 +228,11 @@ function parseElement(
 ): OrgEmphasisNode {
   const s = context.source;
   let tag = s[0];
-  let extra = false
+  let extra = false;
 
   if (extraTags.indexOf(tag) > -1) {
     tag = s.substring(0, 2);
-    extra = true
+    extra = true;
   }
   context.source = s.trimStart().slice(tag.length);
   const element: OrgEmphasisNode = {

@@ -82,11 +82,11 @@ LIVE DEMO: https://cheng92.com/demo/org
 
   * [ ] Special text, `doc:documentation`
 
+  * [x] Self-define Emphasis, `~~, ==, ++, __, //, $$`
+
+    * [x] [extra]( https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) : `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
+
 * [x] Attribute, `#+title: org-file-parser-with-js`
-
-* [x] Self-define Emphasis, `~~, ==, ++, __, //, $$`
-
-  * [x] [extra]( https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) : `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
 
 * [x] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
 
