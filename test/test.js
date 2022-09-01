@@ -7,6 +7,7 @@ text = `red:text`
 // text = `<red:text>`
 // text = `title^{_sub_}`
 text = `in red:text other text`
+text = `text1 !!text2!! text3`
 // text = `in <red:text> other text`
 const ast = parse(text)
 // traverse(ast, (node) => {

@@ -26,6 +26,13 @@ import {
 import * as re from './regexp';
 import { matchTimestamp } from './utils';
 
+const extraTags = ['!', '@', '%', '&'];
+export const extraTagMap = extraTags.reduce((tags: string[], tag: string) => {
+  for (let i = 0; i < extraTags.length; i++) {
+    tags.push(tag + extraTags[i]);
+  }
+  return tags;
+}, []);
 const tagMap: Record<string, string> = {
   _: '_', // underline
   '<': '>', // inner link, timestamp, ...
@@ -33,7 +40,9 @@ const tagMap: Record<string, string> = {
   '[': ']', // external link
   '/': '/', // italic
 };
-const endTokens: string[] = ['_', '>', '+', '<', '[', '/'];
+extraTagMap.forEach((tag: string) => (tagMap[tag] = tag));
+
+const endTokens: string[] = ['_', '>', '+', '<', '[', '/', ...extraTagMap];
 
 export function last<T>(xs: T[]): T | undefined {
   return xs[xs.length - 1];
@@ -85,7 +94,7 @@ function parseTimeStamp(context: OrgNestContext): OrgTimestampNode {
 
 export function parseColorText(context: OrgNestContext): OrgColorfulTextNode {
   let s = context.source;
-  const [text, color, value] = re.colorfulTextXRE.exec(s) || [];
+  const [text, color, value] = re.colorTextRE.bareBegin.exec(s) || [];
   context.source = s.slice(text.length);
   return {
     type: OrgNodeTypes.COLORFUL_TEXT,
@@ -152,9 +161,13 @@ function parseChildren(
     const s = context.source;
     let node: OrgTextChildNode | undefined = undefined;
 
+    const ds = s.slice(0, 2); // 取头两个，可能是 !@%& 组合 !@,...
     if (re.stateXRE.test(s)) {
       node = parseStateKeyword(context);
-    } else if (isStartTag(s[0]) && s[1] !== ' ') {
+    } else if (
+      (isStartTag(s[0]) && s[1] !== ' ') ||
+      (isStartTag(ds) && s[2] !== '')
+    ) {
       // 处理一些特殊的非嵌套文本
       let jumpOut = false;
       if (s[0] === '[') {
@@ -172,13 +185,15 @@ function parseChildren(
         } else {
           jumpOut = false;
         }
-      }
+      } // else if (hasElement(extraTags, s[0])) {
+
+      // }
 
       if (!jumpOut) {
         node = parseElement(context, ancestors);
       }
-    } else if (isEndTag(s[0])) {
-      context.source = context.source.slice(1);
+    } else if (isEndTag(s[0]) || isEndTag(ds)) {
+      context.source = context.source.slice(isEndTag(ds) ? ds.length : 1);
       continue;
     }
 
@@ -212,8 +227,11 @@ function parseElement(
   ancestors: OrgTextChildNode[]
 ): OrgEmphasisNode {
   const s = context.source;
-  const tag = s[0];
-  context.source = s.trimStart().slice(1);
+  let tag = s[0];
+  if (extraTags.indexOf(tag) > -1) {
+    tag = s.substring(0, 2);
+  }
+  context.source = s.trimStart().slice(tag.length);
   const element: OrgEmphasisNode = {
     type: OrgNodeTypes.EMPHASIS,
     sign: tag as InlineEmphasisSign,
@@ -228,7 +246,7 @@ function parseElement(
 
   const endTag = tagMap[element.sign];
   if (startsWith(context.source, endTag)) {
-    context.source = context.source.slice(1);
+    context.source = context.source.slice(endTag.length);
   }
 
   return element;
@@ -239,7 +257,8 @@ function parseNestText(context: OrgNestContext): OrgTextNode {
   let endIndex = s.length;
 
   for (let i = 0; i < endTokens.length; i++) {
-    const index = s.indexOf(endTokens[i], 1);
+    const token = endTokens[i];
+    const index = s.indexOf(token, token.length);
     if (index !== -1 && endIndex > index) {
       endIndex = index;
     }

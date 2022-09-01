@@ -47,3 +47,7 @@ export function traverse(root: any, cb: (node: any) => void): void {
     }
   }
 }
+
+export function hasElement<T>(arr: T[], ele: T): boolean {
+  return arr.indexOf(ele) > -1
+}
