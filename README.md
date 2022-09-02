@@ -104,6 +104,8 @@ LIVE DEMO: https://cheng92.com/demo/org
 
 * [x] Blocks, `#+begin_xxx ... #end_xxx`
 
+  * [x] Textblock, special text block
+
   * [x] block attributes, `:result both :noweb yes`
 
     ```json
