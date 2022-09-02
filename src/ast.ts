@@ -1,5 +1,6 @@
 export interface OrgParserOptions {
-  onError: (error: Error) => void;
+  onError?: (error: Error) => void;
+  extraTextBackground?: boolean | string; // !@%& 组件文本的背景
 }
 
 export enum OrgStates {
@@ -189,6 +190,7 @@ export interface OrgEmphasisNode extends OrgBaseNode {
   type: OrgNodeTypes.EMPHASIS;
   sign: InlineEmphasisSign;
   extra?: boolean;
+  background?: boolean | string; // 需不需要显示背景
 }
 
 export const SIGN_SUB = '_';

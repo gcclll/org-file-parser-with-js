@@ -22,14 +22,14 @@ import {
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
 import { matchTimestamp, findIndex, traverse, isString } from './utils';
-import { transformColorText } from './transform'
+import { transformColorText } from './transform';
 
 export function baseParse(
   source: string,
-  options: OrgParserOptions = {
-    onError: (error: Error) => console.warn(error),
-  }
+  options?: OrgParserOptions
 ): OrgRootNode {
+  const { extraTextBackground } = options || {};
+
   // 按行分析，因为 file.org 文档中主要是按照行来区分文章内容的。
   const list = source.split(/\n+/);
 
@@ -50,20 +50,25 @@ export function baseParse(
     properties: [],
     footnotes: [],
     options,
-  }
+  };
 
   traverse(root, (node: OrgValidNode) => {
     if (node.type === OrgNodeTypes.EMPHASIS) {
       // 处理 content 中包含 red:text 的文本，因为 emphasis.ts 中会将
       // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
       // 成 EMPHASIS 节点。
-      transformColorText(node)
+      transformColorText(node);
+
+      // 控制 extra emphasis text(!@%&) 文本的背景显示
+      if (node.extra && extraTextBackground) {
+        node.background = extraTextBackground
+      }
     } else if (node.type === OrgNodeTypes.BLOCK) {
       if (node.name === 'textbox' && isString(node.code)) {
-        node.code = parseEmphasisNode(node.code as string)
+        node.code = parseEmphasisNode(node.code as string);
       }
     }
-  })
+  });
 
   return root;
 }
