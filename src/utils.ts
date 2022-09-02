@@ -36,13 +36,13 @@ export function findIndex(
   return list.slice(fromIndex).findIndex(callback);
 }
 
-export function traverse(root: any, cb: (node: any) => void): void {
+export function traverse(root: any, cb: (node: any, parent?: any) => void): void {
   const children = root.children;
 
   if (children?.length) {
     for (let i = 0; i < children.length; i++) {
       const child = children[i]
-      cb(child)
+      cb(child, root)
       traverse(child, cb);
     }
   }

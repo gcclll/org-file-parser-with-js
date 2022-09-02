@@ -52,7 +52,7 @@ export function baseParse(
     options,
   };
 
-  traverse(root, (node: OrgValidNode) => {
+  traverse(root, (node: OrgValidNode, parent: OrgValidNode) => {
     if (node.type === OrgNodeTypes.EMPHASIS) {
       // 处理 content 中包含 red:text 的文本，因为 emphasis.ts 中会将
       // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
@@ -68,6 +68,7 @@ export function baseParse(
         node.code = parseEmphasisNode(node.code as string);
       }
     }
+    console.log(parent.type, 'parent')
   });
 
   return root;
