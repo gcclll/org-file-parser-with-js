@@ -54,7 +54,7 @@ export function transformList(
   // 可以为该列表增加一些属性
   if (
     prevNode?.type === OrgNodeTypes.PROPERTY &&
-    prevNode.name === 'list_attr'
+    prevNode.name.toLowerCase() === 'list_attr'
   ) {
     const { value = '' } = prevNode;
     if (typeof value === 'string') {
