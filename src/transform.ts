@@ -48,7 +48,27 @@ export function transformList(
     isOrder,
     items: [node],
   };
-  let current = node;
+  let current = node,
+    prevNode = children[index - 1];
+
+  // 可以为该列表增加一些属性
+  if (
+    prevNode?.type === OrgNodeTypes.PROPERTY &&
+    prevNode.name === 'list_attr'
+  ) {
+    const { value = '' } = prevNode;
+    if (typeof value === 'string') {
+      listNode.attrs = value.split(';').reduce((result, curr) => {
+        if (curr) {
+          const [name, value] = (curr || '').split('=');
+          result[name] = value;
+        }
+        return result;
+      }, {} as Record<string, string>);
+    }
+    toDeletions.push({ node: prevNode, children, index: index - 1 })
+  }
+
   for (let i = index + 1; i < children.length; i++) {
     const child = children[i];
     if (child.type !== OrgNodeTypes.LIST_ITEM) {

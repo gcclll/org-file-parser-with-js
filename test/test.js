@@ -119,6 +119,7 @@ DEADLINE: <2022-07-06 Wed>
 `
 text = `
   text 1
+#+list_attr: name=x-list;value=xxx
 1) list item 1
    text 11
 2) list item 2

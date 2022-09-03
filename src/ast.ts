@@ -183,6 +183,7 @@ export interface OrgListNode extends OrgBaseNode {
   name: string; // 无序：-/+, 有序：1)/a)/1./a.
   isOrder: boolean; // 有序列表/无序列表
   items: OrgListItem[];
+  attrs?: Record<string, string>;
 }
 
 
