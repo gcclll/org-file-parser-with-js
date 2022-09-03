@@ -48,6 +48,7 @@ export function transformList(
     isOrder,
     items: [node],
   };
+  let current = node
   for (let i = index + 1; i < children.length; i++) {
     const child = children[i];
     if (child.type !== OrgNodeTypes.LIST_ITEM) {
@@ -64,10 +65,11 @@ export function transformList(
         break;
       } else {
         // 存在父子关系，将该节点存放到当前list item 节点的 children
-        (node.children = node.children || []).push(child);
+        (current.children = current.children || []).push(child);
         toDeletions.push({ node: child, children, index: i });
       }
     } else {
+      current = child
       if (child.name === node.name) {
         // 同一类型的
         listNode.items.push(child)

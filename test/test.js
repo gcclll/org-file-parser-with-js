@@ -120,9 +120,10 @@ DEADLINE: <2022-07-06 Wed>
 text = `
   text 1
 - list item 1
+   text 11
 - list item 2
 
-    text 2`
+    text 22`
 const ast = parse(text)
 // traverse(ast, (node) => {
 //   console.log(node)
