@@ -96,11 +96,11 @@ LIVE DEMO: https://cheng92.com/demo/org
 
   * [x] more richable text, eg. Emphasis, Colorful text
 
-* [ ] List
+* [x] List
 
   * [x] Unordered lists, `-, +, * `
   * [x] Ordered lists, `1. 1)`
-  * [ ] List children parsing
+  * [x] List children parsing
 
 * [x] Blocks, `#+begin_xxx ... #end_xxx`
 
