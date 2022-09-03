@@ -123,7 +123,12 @@ text = `
    text 11
 - list item 2
 
-    text 22`
+    text 22
+
+    text 33
+
+text 44`
+
 const ast = parse(text)
 // traverse(ast, (node) => {
 //   console.log(node)
