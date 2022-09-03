@@ -20,6 +20,7 @@ export enum OrgNodeTypes {
 
   EMPHASIS, // =,_,/,+,$,[!&%@]{2}
   LIST, // - [-], 1. ...
+  LIST_ITEM,
   TIMESTAMP, // <2022-11-12 Wed 12:00>
   LINK, // external: [[url][name]], inner: <<meta_id>>
   STATE, // TODO, DONE, etc.
@@ -52,13 +53,14 @@ export type OrgValidNode =
   | OrgHeaderNode
   | OrgBlockNode
   | OrgListNode
+  | OrgListItem
   | OrgTextChildNode
   | OrgTableNode;
 
 export interface OrgBaseNode {
   indent?: number;
   content?: string | OrgTextChildNode;
-  children?: OrgTextChildNode[];
+  children?: OrgValidNode[];
 }
 
 export type OrgTableRowType = Record<string, string>;
@@ -168,12 +170,22 @@ export interface OrgBlockNode extends OrgBaseNode {
 }
 
 export declare type OrgListItemState = ' ' | '-' | 'x' | 'X';
+
+export interface OrgListItem extends OrgBaseNode {
+  type: OrgNodeTypes.LIST_ITEM;
+  state: OrgListItemState;
+  name: string;
+  isOrder: boolean;
+}
+
 export interface OrgListNode extends OrgBaseNode {
   type: OrgNodeTypes.LIST;
   name: string; // 无序：-/+, 有序：1)/a)/1./a.
   isOrder: boolean; // 有序列表/无序列表
-  state: OrgListItemState;
+  items: OrgListItem[];
 }
+
+
 
 export enum InlineEmphasisSign {
   CODE_EQUAL = '=',

@@ -3,7 +3,7 @@ import {
   OrgAttribute,
   OrgBlockNode,
   OrgBlockOptions,
-  OrgListNode,
+  OrgListItem,
   OrgListItemState,
   OrgHeaderNode,
   OrgHeaderProperty,
@@ -22,7 +22,7 @@ import {
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
 import { matchTimestamp, findIndex, traverse, isString } from './utils';
-import { transformColorText } from './transform';
+import { transformColorText, transformList } from './transform';
 
 export function baseParse(
   source: string,
@@ -52,24 +52,28 @@ export function baseParse(
     options,
   };
 
-  traverse(root, (node: OrgValidNode, parent: OrgValidNode) => {
-    if (node.type === OrgNodeTypes.EMPHASIS) {
-      // 处理 content 中包含 red:text 的文本，因为 emphasis.ts 中会将
-      // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
-      // 成 EMPHASIS 节点。
-      transformColorText(node);
+  traverse(
+    root,
+    (node: OrgValidNode, parent: OrgValidNode, childIndex: number) => {
+      if (node.type === OrgNodeTypes.EMPHASIS) {
+        // 处理 content 中包含 red:text 的文本，因为 emphasis.ts 中会将
+        // _u1 <red:underline ... /italic/ xxx> u2_ 这种复杂的文本中的 <red:underline 解析
+        // 成 EMPHASIS 节点。
+        transformColorText(node);
 
-      // 控制 extra emphasis text(!@%&) 文本的背景显示
-      if (node.extra && extraTextBackground) {
-        node.background = extraTextBackground
-      }
-    } else if (node.type === OrgNodeTypes.BLOCK) {
-      if (node.name === 'textbox' && isString(node.code)) {
-        node.code = parseEmphasisNode(node.code as string);
+        // 控制 extra emphasis text(!@%&) 文本的背景显示
+        if (node.extra && extraTextBackground) {
+          node.background = extraTextBackground;
+        }
+      } else if (node.type === OrgNodeTypes.BLOCK) {
+        if (node.name === 'textbox' && isString(node.code)) {
+          node.code = parseEmphasisNode(node.code as string);
+        }
+      } else if (node.type === OrgNodeTypes.LIST_ITEM) {
+        transformList(node, parent, childIndex);
       }
     }
-    console.log(parent.type, 'parent')
-  });
+  );
 
   return root;
 }
@@ -168,13 +172,13 @@ function parseList(
   list: string[],
   index: number,
   isOrder: boolean
-): OrgListNode {
+): OrgListItem {
   const _re = isOrder ? re.orderListRE : re.unorderListRE;
   const [, indent = '', name = '', state = '', text = ''] =
     _re.exec(source) || [];
 
   return {
-    type: OrgNodeTypes.LIST,
+    type: OrgNodeTypes.LIST_ITEM,
     content: parseText(text, list, index),
     children: [],
     name,
@@ -570,7 +574,7 @@ function parseTextExtra(
     }
   }
 
-  node.children!.forEach((child: OrgTextChildNode) => {
+  node.children!.forEach((child: OrgValidNode) => {
     let cursor = 0,
       result;
     // FIX: `red:text` 因为前后没有空格不能被正确解析
@@ -612,7 +616,7 @@ function parseTextExtra(
         });
       }
     } else {
-      children.push(child);
+      children.push(child as any);
     }
   });
 

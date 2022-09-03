@@ -117,7 +117,12 @@ DEADLINE: <2022-07-06 Wed>
 :STYLE: .test{color:red}
 :END:
 `
-// text = `!@xx!@`
+text = `
+  text 1
+- list item 1
+- list item 2
+
+    text 2`
 const ast = parse(text)
 // traverse(ast, (node) => {
 //   console.log(node)
