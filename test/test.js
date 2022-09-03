@@ -119,15 +119,17 @@ DEADLINE: <2022-07-06 Wed>
 `
 text = `
   text 1
-- list item 1
+1) list item 1
    text 11
-- list item 2
+2) list item 2
 
     text 22
 
     text 33
 
-text 44`
+1) list item 3
+2) list item 3
+* header`
 
 const ast = parse(text)
 // traverse(ast, (node) => {

@@ -48,7 +48,7 @@ export function transformList(
     isOrder,
     items: [node],
   };
-  let current = node
+  let current = node;
   for (let i = index + 1; i < children.length; i++) {
     const child = children[i];
     if (child.type !== OrgNodeTypes.LIST_ITEM) {
@@ -69,24 +69,49 @@ export function transformList(
         toDeletions.push({ node: child, children, index: i });
       }
     } else {
-      current = child
-      if (child.name === node.name) {
-        // 同一类型的
-        listNode.items.push(child)
-        toDeletions.push({ node: child, children, index: i })
+      current = child;
+      const push = () => {
+        listNode.items.push(child);
+        toDeletions.push({ node: child, children, index: i });
+      };
+      if (isOrder) {
+        // 有序列表的 name 是不同的，应该是递增的(a->b, 1->2, i->ii, ...)
+        // 目前只支持 1. ... 和 a. 或 1) 和 a) 形式的列表
+        if (/[0-9]+/.test(name) && /[0-9]+/.test(child.name)) {
+          if (+child.name - +name >= 1) {
+            // 1. xxx 2. yyy, 或 1. xxx 3. yyy
+            push();
+          } else {
+            // 3. xxx 1.yyy -> 重新开始
+            break;
+          }
+        } else if (/[a-zA-Z]/.test(name) && /[a-zA-Z]/.test(child.name)) {
+          if (child.name > name) {
+            // a) xxx b) yyy
+            push();
+          } else {
+            break;
+          }
+        }
+      } else {
+        // 无序列表直接判断 name 就行，如： - xxx \n - yyy
+        if (child.name === node.name) {
+          // 同一类型的
+          push();
+        }
       }
     }
   }
 
   // 将 list item 替换成 list 节点
-  children.splice(index, index, listNode)
+  children.splice(index, 1, listNode);
 
   // 待删除的节点
   if (toDeletions.length) {
     toDeletions.forEach((deletion) => {
       const { children = [], node } = deletion;
       // 可能索引发生的变化，不能直接使用缓存的 Index
-      const index = children.indexOf(node)
+      const index = children.indexOf(node);
       index > -1 && children.splice(index, 1);
     });
   }
