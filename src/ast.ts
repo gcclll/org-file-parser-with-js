@@ -149,7 +149,9 @@ export interface OrgHeaderNode extends OrgBaseNode {
   properties?: OrgHeaderProperty[];
 }
 
-export interface OrgAttribute extends OrgPairNode<string | boolean> {}
+export interface OrgAttribute extends OrgPairNode<string | boolean> {
+  category?: string;
+}
 
 export interface OrgLinkNode extends OrgBaseNode {
   type: OrgNodeTypes.LINK;

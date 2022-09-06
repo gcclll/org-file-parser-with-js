@@ -35,6 +35,9 @@ export function baseParse(
 
   let nodes: OrgValidNode[] = [];
 
+  // 文章开头可能包含一些全文的属性，比如：org-roam 的 ID
+  const properties: Array<OrgAttribute> = parseHeadProperty(0, list);
+
   for (let i = 0; i < list.length; i++) {
     const node = parseNode(list[i], list, i);
     if (node) {
@@ -47,7 +50,7 @@ export function baseParse(
   const root: OrgRootNode = {
     type: OrgNodeTypes.ROOT,
     children: nodes,
-    properties: [],
+    properties,
     footnotes: [],
     options,
   };
@@ -474,8 +477,11 @@ function parseHeader(
 }
 
 // PROPERTIES, LOGBOOK
-function parseHeadProperty(startIndex: number, list: string[]) {
-  const properties: Array<OrgHeaderProperty> = [];
+function parseHeadProperty<T = OrgHeaderProperty>(
+  startIndex: number,
+  list: string[]
+): Array<T> {
+  const properties: Array<T> = [];
 
   const singlePropertyRE = /\s*([A-Z]+):(.*)/; // CLOSED, DEADLINE
   const multiPropertyRE = /\s*:([A-Z]+):/; // LOGBOOK, PROPERTIES
@@ -503,14 +509,15 @@ function parseHeadProperty(startIndex: number, list: string[]) {
       propList.forEach((prop: string) => {
         let [, name = '', value = ''] =
           prop.match(/^\s*:?([A-Z-_]+):(.*)/) || [];
+        value = value.trim();
         if (name === 'CLOCK') {
-          value = parseClockValue(value.trim()) as string;
+          value = parseClockValue(value) as string;
         }
         properties.push({
           name,
           value,
           category,
-        });
+        } as any);
       });
     } else if (singlePropertyRE.test(next)) {
       matched = next.match(singlePropertyRE);
@@ -519,8 +526,8 @@ function parseHeadProperty(startIndex: number, list: string[]) {
         const [, name = '', value = ''] = matched;
         properties.push({
           name,
-          value: matchTimestamp(value),
-        });
+          value: matchTimestamp(value.trim()),
+        } as any);
       }
     }
   }

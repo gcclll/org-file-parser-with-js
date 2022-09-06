@@ -118,6 +118,10 @@ DEADLINE: <2022-07-06 Wed>
 :END:
 `
 text = `
+:PROPERTIES:
+:ID:       a4647863-71e6-4764-88db-b80bfb963f69
+:END:
+
   text 1
 #+list_attr: name=x-list;value=xxx
 1) list item 1
