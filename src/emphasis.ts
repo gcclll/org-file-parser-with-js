@@ -37,12 +37,12 @@ const tagMap: Record<string, string> = {
   _: '_', // underline
   '<': '>', // inner link, timestamp, ...
   '+': '+', // line through
-  '[': ']', // external link
   '/': '/', // italic
+  '[[': ']]', // external link
 };
 extraTagMap.forEach((tag: string) => (tagMap[tag] = tag));
 
-const endTokens: string[] = ['_', '>', '+', '<', '[', '/', ...extraTagMap];
+const endTokens: string[] = ['_', '>', '+', '<', '/', '[[', ...extraTagMap];
 
 export function last<T>(xs: T[]): T | undefined {
   return xs[xs.length - 1];
