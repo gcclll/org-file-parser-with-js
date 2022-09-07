@@ -1,7 +1,7 @@
 {
   "name": "org-file-parser-with-js",
   "author": "gcclll <gccll.love@gmail.com>",
-  "version": "0.1.46",
+  "version": "0.1.47",
   "license": "MIT",
   "description": "A parser for Emacs Org mode files.",
   "main": "./src/index.ts",
