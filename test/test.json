@@ -176,34 +176,14 @@
       "code": "(message \"hello emacs-lisp!!!\")",
       "lang": "emacs-lisp",
       "attributes": [],
-      "options": []
-    },
-    {
-      "type": 2,
-      "name": "RESULT",
-      "value": true
-    },
-    {
-      "type": 1,
-      "content": ": \"hello world!\"",
-      "indent": 0,
-      "children": [
-        {
-          "type": 1,
-          "content": ": \"hello world!\"   "
-        }
-      ]
-    },
-    {
-      "type": 1,
-      "content": ": \"hello emacs-lisp!\"",
-      "indent": 0,
-      "children": [
-        {
-          "type": 1,
-          "content": ": \"hello emacs-lisp!\"   "
-        }
-      ]
+      "options": [],
+      "result": {
+        "type": 14,
+        "values": [
+          ": \"hello world!\"",
+          ": \"hello emacs-lisp!\""
+        ]
+      }
     }
   ],
   "properties": [

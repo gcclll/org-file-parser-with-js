@@ -140,4 +140,43 @@ export function transformList(
   }
 }
 
-export const normalTransforms = [transformList];
+export function transformBlockResult(
+  node: OrgValidNode,
+  parent: OrgValidNode,
+  index: number
+): void {
+  // 必须是 #+RESULT:
+  if (node.type === OrgNodeTypes.PROPERTY && node.name === 'RESULT') {
+    const children = parent.children || [];
+    if (children.length === 0) return;
+
+    // 自身也要合并到对应的 block 中去
+    const toDeletions: Array<any> = [{ node, children, index }];
+
+    // 没有对应的代码块，视为无效的结果
+    const prevNode = children[index - 1];
+    if (!prevNode || prevNode.type !== OrgNodeTypes.BLOCK) {
+      return;
+    }
+
+    // 结果可能是 block 也可能是 result 节点
+    const nextNode = children[index + 1];
+
+    if (
+      nextNode &&
+      (nextNode.type === OrgNodeTypes.RESULT ||
+        nextNode.type === OrgNodeTypes.BLOCK)
+    ) {
+      prevNode.result = nextNode;
+      toDeletions.push({ node: nextNode, children, index: index + 1 });
+    }
+
+    toDeletions.forEach((deletion) => {
+      const { node, children } = deletion;
+      const idx = children.indexOf(node);
+      idx > -1 && children.splice(idx, 1);
+    });
+  }
+}
+
+export const normalTransforms = [transformList, transformBlockResult];

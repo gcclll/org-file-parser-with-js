@@ -28,6 +28,8 @@ export enum OrgNodeTypes {
   SUB_SUP, // 下标或上标
   COLORFUL_TEXT, // 带颜色的文本
   TABLE, // 表格
+
+  RESULT, // `: hello world` 行文本
 }
 
 export interface OrgRootNode {
@@ -55,7 +57,8 @@ export type OrgValidNode =
   | OrgListNode
   | OrgListItem
   | OrgTextChildNode
-  | OrgTableNode;
+  | OrgTableNode
+  | OrgResultNode;
 
 export interface OrgBaseNode {
   indent?: number;
@@ -90,6 +93,11 @@ export interface OrgStateNode extends OrgBaseNode {
 export interface OrgPairNode<T> extends OrgBaseNode {
   name: string;
   value: T;
+}
+
+export interface OrgResultNode extends OrgBaseNode {
+  type: OrgNodeTypes.RESULT;
+  values: string[];
 }
 
 export interface OrgFootNode extends OrgPairNode<string> {}
@@ -169,7 +177,7 @@ export interface OrgBlockNode extends OrgBaseNode {
   lang?: string;
   attributes?: OrgAttribute[];
   options?: OrgBlockOptions;
-  result?: OrgBlockNode | string[];
+  result?: OrgBlockNode | OrgResultNode;
 }
 
 export declare type OrgListItemState = ' ' | '-' | 'x' | 'X';

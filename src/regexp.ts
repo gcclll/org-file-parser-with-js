@@ -24,6 +24,9 @@ export const subSupXRE = /^([\w-]+)(\^|_){([<\w-=:~\+/*>]+)}/;
 export const tableRowRE = /^(\s*)\|(.*?)\|$/;
 export const tableRowLineRE = /^(\s*)\|[+-]+\|$/;
 
+// result line, eg. `: hello world`, 一般跟在 #+RESULT: 后面
+export const resultLineRE = /^\s*:\s(.*)/
+
 const colorNameREStr = `[a-zA-Z]+|#[0-9a-e]{3}|#[0-9a-e]{6}`;
 
 // shit????????????, global 用来遍历找出结果，无global的用来检查是否匹配正则

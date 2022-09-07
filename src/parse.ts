@@ -15,6 +15,7 @@ import {
   OrgTableRowType,
   OrgValidNode,
   OrgTextChildNode,
+  OrgResultNode,
   OrgRootNode,
   OrgNodeTypes,
   SIGN_SUB,
@@ -93,6 +94,8 @@ function parseNode(
     node = parseTable(source, list, index);
   } else if (re.blockBeginRE.test(source)) {
     node = parseBlock(source, list, index);
+  } else if (re.resultLineRE.test(source)) {
+    node = parseResult(source, list, index);
   } else if (re.propertyRE.test(source)) {
     node = parseProperty(source, list, index);
   } else if (re.headerRE.test(source)) {
@@ -110,6 +113,38 @@ function parseNode(
   }
 
   return node;
+}
+
+// 解析 `: hello world` 行文本，一般跟在 `#+RESULT:` 后面做为代码块输出结果
+function parseResult(
+  _: string,
+  list: string[],
+  index: number
+): OrgResultNode | undefined {
+
+  let start = 0, n = 0;
+  const values: string[] = []
+  for (let i = index; i < list.length; i++) {
+    const s = list[i]
+    if (s && re.resultLineRE.test(s)) {
+      start = start === 0 ? i : start
+      n++
+      values.push(s)
+    } else {
+      break
+    }
+  }
+
+  if (start === 0 || n === 0) {
+    return
+  }
+
+  list.splice(start, n)
+
+  return {
+    type: OrgNodeTypes.RESULT,
+    values,
+  }
 }
 
 function parseTable(
