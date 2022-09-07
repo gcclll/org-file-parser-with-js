@@ -37,7 +37,7 @@
   },
   "scripts": {
     "start": "tsdx watch",
-    "build": "tsdx build",
+    "build": "tsdx build --format esm,cjs,umd",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
