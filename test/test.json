@@ -1,0 +1,18 @@
+{
+  "type": 0,
+  "children": [
+    {
+      "type": 1,
+      "content": ": { type: 'div', props: { id: 'foo', children: [ [Object] ] } }",
+      "indent": 0,
+      "children": [
+        {
+          "type": 1,
+          "content": ": { type: 'div', props: { id: 'foo', children: [ [Object] ] } }   "
+        }
+      ]
+    }
+  ],
+  "properties": [],
+  "footnotes": []
+}

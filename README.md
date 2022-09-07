@@ -403,195 +403,46 @@ Result Example JSON:
 }
 ```
 
-# APIs
+# Problems
 
-## Types
 
-```typescript
-export const enum NodeTypes {
-  ROOT, // 根节点
-  TEXT, // pure text
-  PROPERTY, // #+...
-  HEADER, // ** ...
-  BLOCK, // #+begin...#+end
-  EMPHASIS, // =,_,/,+,$
-  LIST, // - [-], 1. ...
 
-  // 各称链接
-  EXTERNAL_LINK, // [[url][name]]
-  INNER_LINK, // <<meta_id>>
-}
-```
-
-## Parse Functions
-
-### baseParse
-
-the entry function.
-
-```typescript
-export function baseParse(
-  source: string,
-  options: ParserOptions = {
-    onError: (error: Error) => console.warn(error),
-  }
-)
-```
-
-usage:
-
-```typescript
-const ast = baseParse(`
-#+title: test
-....`/*org file content*/)
-// ast => {type: 0 /*root*/, children: [{ ... }] ...}
-```
-
-### parseNode()
-
-### parseList()
-
-### parseBlock()
-
-### parseCLIOption()
-
-```typescript
- function parseCLIOption(str: string): BlockOptions
-```
-
-parse the cli options, used for `parseBlock()`
-
-`#+begin_src emacs-lisp -n -r` =>
+- ``: { type: 'div', props: { id: 'foo', children: [ [Object] ] } }`` will be parsed to 
 
 ```json
 {
-  n: '', // if -n 20 -r, value is '20' here
-  r: ''
+    "type": 0,
+    "children": [
+        {
+            "type": 1,
+            "content": ":{ type: 'div', props: { id: 'foo', children: [ [Object] ] } }",
+            "indent": 0,
+            "children": [
+                {
+                    "type": 1,
+                    "content": ":{ type: 'div', props: { id: 'foo', children: "
+                },
+                {
+                    "type": 1,
+                    "content": "[",
+                    "children": []
+                },
+                {
+                    "type": 5, // should be 1 /*TEXT*/ and content -> `Object`
+                    "sign": "[",
+                    "children": [
+                        {
+                            "type": 1,
+                            "content": "Object] ] } }   "
+                        }
+                    ],
+                    "extra": false
+                }
+            ]
+        }
+    ],
+    "properties": [],
+    "footnotes": []
 }
 ```
 
-### parseHeader()
-
-### parseProperty()
-
-### parseText()
-
-```typescript
-export function parseText(content: string, index: number): TextNode
-```
-
-parse the main body under headers or beginning of org file.
-
-eg.
-
-```
-test1 ~code~ test2 =code2=
-```
-
-it will parse the text upon to four nodes.
-
-Node[0] is `test1`
-
-Node[1] is `~code~`
-
-Node[2] is `test2`
-
-Node[3] is `=code2=`
-
-They will be append to `node.children[...Node]`
-
-So, you can parse the `node.children` and concat the parsed ast result to show the whole paragraph text.
-
-### parseSubSupText()
-
-```typescript
-export const SIGN_SUB = '_'
-export const SIGN_SUP = '^'
-export interface OrgSubSupNode extends OrgNode {
-  type: OrgNodeTypes.SUBSUP;
-  sign: '_' | '^';
-  target: string;
-  sub?: string;
-  sup?: string;
-}
-
-```
-
-### parseEmphasisText()
-
-```typescript
-export function parseEmphasisText(parent: TextNode): TextNode
-```
-
-parse the built-in emphasis or [extra special](https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) texts.
-
-Built-in: `~~, $$, ==, **`
-
-Extra: `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
-
-### parseTimestamp()
-
-```typescript
-export function parseTimestamp(node: TextNode): TextNode
-```
-
-parse the timestamp text in header or anywhere.
-
-eg.
-
-`<2022-12-02 Wed 12:00 +1w>` will be parsed to a `Timestamp` type object:
-
-```typescript
-interface Timestamp {
-  year: string;
-  month: string;
-  day: string;
-  week?: string;
-  time?: string;
-  dein?: string; // [+-]\d[wdmy], per month/day/week/year date
-}
-```
-
-`dein` is **decrease** or **increase** abbrev.
-
-This also supports time scope, like `<2022-12-02 Wed 12:00-14:00 +1w>`
-
-### parseExternalLink()
-
-### parseInnerLink()
-
-### parseStateKeywords()
-
-### parseTags()
-
-```typescript
-function parseTags(content: string): {
-  content: string;
-  tags: string[];
-}
-```
-
-parse the tags behind the header. Format: `:tag1:tag2:tag3:` will be parsed to an string array `['tag1', 'tag2', 'tag3']`
-
-## parseTextExtra()
-
-## Utilities
-
-### matchTimestamp()
-
-```typescript
-export function matchTimestamp(timestamp: string): Timestamp
-```
-
-## extractHeaderProperties()
-
-## findIndex()
-
-# Other
-
-```json
-// package.json
-{
-	"module": "dist/org-file-parser-with-js.esm.js",
-}
-```
