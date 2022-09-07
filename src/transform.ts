@@ -2,7 +2,6 @@ import {
   OrgEmphasisNode,
   OrgListNode,
   OrgValidNode,
-  OrgListItem,
   OrgNodeTypes,
 } from './ast';
 import { isString, assign } from './utils';
@@ -34,10 +33,14 @@ export function transformColorText(node: OrgEmphasisNode): void {
 }
 
 export function transformList(
-  node: OrgListItem,
+  node: OrgValidNode,
   parent: OrgValidNode,
   index: number
 ): void {
+  if (node.type !== OrgNodeTypes.LIST_ITEM) {
+    return;
+  }
+
   const children = parent.children || [];
   const { indent = 0, name, isOrder } = node;
 
@@ -66,7 +69,7 @@ export function transformList(
         return result;
       }, {} as Record<string, string>);
     }
-    toDeletions.push({ node: prevNode, children, index: index - 1 })
+    toDeletions.push({ node: prevNode, children, index: index - 1 });
   }
 
   for (let i = index + 1; i < children.length; i++) {
@@ -137,4 +140,4 @@ export function transformList(
   }
 }
 
-export const transforms = [transformColorText, transformList];
+export const normalTransforms = [transformList];

@@ -169,6 +169,7 @@ export interface OrgBlockNode extends OrgBaseNode {
   lang?: string;
   attributes?: OrgAttribute[];
   options?: OrgBlockOptions;
+  result?: OrgBlockNode | string[];
 }
 
 export declare type OrgListItemState = ' ' | '-' | 'x' | 'X';

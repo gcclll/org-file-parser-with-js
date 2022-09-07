@@ -22,7 +22,7 @@ import {
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
 import { matchTimestamp, findIndex, traverse, isString } from './utils';
-import { transformColorText, transformList } from './transform';
+import { transformColorText, normalTransforms } from './transform';
 
 export function baseParse(
   source: string,
@@ -72,9 +72,10 @@ export function baseParse(
         if (node.name === 'textbox' && isString(node.code)) {
           node.code = parseEmphasisNode(node.code as string);
         }
-      } else if (node.type === OrgNodeTypes.LIST_ITEM) {
-        transformList(node, parent, childIndex);
       }
+
+      // normal transforms
+      normalTransforms.forEach((t) => t(node, parent, childIndex));
     }
   );
 
@@ -394,6 +395,9 @@ function parseBlock(
   // 将代码块从源 list 中删除，避免重复解析
   list.splice(index + 1, i - index);
 
+  // 找到对应的结果(如果是代码块，可直接执行得到 #+RESULT：结果)
+  // parseBlockResult(node, list, index + 1)
+
   return node;
 }
 
@@ -487,7 +491,14 @@ function parseHeadProperty<T = OrgHeaderProperty>(
   const multiPropertyRE = /\s*:([A-Z]+):/; // LOGBOOK, PROPERTIES
   for (let i = startIndex; i < list.length; i++) {
     const next = list[i];
-    if (re.headerRE.test(next)) break;
+    // FIX: 非标题的property 不应该解析到header 中
+    // 只有 `:NAME: value` 或 `#+name: value` 开头的是合法的标题属性
+    if (
+      next.trim() &&
+      (re.headerRE.test(next) ||
+        !(singlePropertyRE.test(next) || multiPropertyRE.test(next)))
+    )
+      break;
 
     let matched;
     if (multiPropertyRE.test(next)) {
