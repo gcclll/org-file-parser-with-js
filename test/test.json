@@ -3,12 +3,119 @@
   "children": [
     {
       "type": 1,
+      "content": "<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com>",
+      "indent": 0,
+      "children": [
+        {
+          "type": 12,
+          "sign": "<",
+          "children": [
+            {
+              "type": 1,
+              "content": "GCCLL | Homepage | green | | gnu-emacs | tinder |/|   "
+            }
+          ],
+          "extra": false,
+          "color": "badge",
+          "badge": {
+            "message": "green",
+            "color": "gnu-emacs",
+            "schemaVersion": 1,
+            "label": "GCCLL",
+            "labelColor": "Homepage",
+            "logoColor": "",
+            "url": "https://img.shields.io/static/v1?message=green&color=gnu-emacs&label=GCCLL&labelColor=Homepage"
+          }
+        },
+        {
+          "type": 12,
+          "content": "//www.baidu.com",
+          "indent": 0,
+          "children": [],
+          "color": "https"
+        },
+        {
+          "type": 1,
+          "content": "| https:"
+        },
+        {
+          "type": 5,
+          "sign": "/",
+          "children": [],
+          "extra": false
+        },
+        {
+          "type": 1,
+          "content": "blog.cheng92.com"
+        }
+      ]
+    },
+    {
+      "type": 1,
       "content": "text 1",
       "indent": 2,
       "children": [
         {
           "type": 1,
           "content": "text 1   "
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "content": "text1 red:text text2 <color:text> text3",
+      "indent": 0,
+      "children": [
+        {
+          "type": 1,
+          "content": "text1   "
+        },
+        {
+          "type": 12,
+          "content": "text",
+          "indent": 0,
+          "children": [],
+          "color": "red"
+        },
+        {
+          "type": 1,
+          "content": "text2 "
+        },
+        {
+          "type": 12,
+          "sign": "<",
+          "children": [
+            {
+              "type": 1,
+              "content": "text",
+              "children": [
+                {
+                  "type": 1,
+                  "content": "text   "
+                }
+              ]
+            }
+          ],
+          "extra": false,
+          "color": "color"
+        },
+        {
+          "type": 1,
+          "content": "text3   "
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "content": "https://www.baidu.com",
+      "indent": 0,
+      "children": [
+        {
+          "type": 12,
+          "content": "//www.baidu.com",
+          "indent": 0,
+          "children": [],
+          "color": "https"
         }
       ]
     },

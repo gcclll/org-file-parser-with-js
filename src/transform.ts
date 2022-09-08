@@ -3,8 +3,9 @@ import {
   OrgListNode,
   OrgValidNode,
   OrgNodeTypes,
+  OrgBadgeType,
 } from './ast';
-import { isString, assign } from './utils';
+import { isString, assign, buildUrlParam } from './utils';
 import { colorTextRE } from './regexp';
 import { parseEmphasisNode } from './emphasis';
 
@@ -210,7 +211,7 @@ export function transformColorBadge(
                 });
               }
             }
-          } else if (isString(child.content)){
+          } else if (isString(child.content)) {
             first.content += child.content as string;
           }
         }
@@ -218,8 +219,74 @@ export function transformColorBadge(
 
       // 删除后面的 children
       children.splice(1);
+
+      // gccll|homepage|green|/|vue 将每项根据对应关系解析出来
+      // 对应关系：left-message|right-message|right-color|/|logo
+      if (isString(first.content)) {
+        const content = first.content as string;
+        node.badge = buildBadgeJSON(content);
+      }
     }
   }
+}
+
+function trim2Arr(s: string, splitter: string = '|'): string[] {
+  return !s
+    ? []
+    : s
+        .trim()
+        .split(splitter)
+        .map((s) => s.trim())
+        .filter(Boolean);
+}
+
+function buildBadgeJSON(content: string): OrgBadgeType | undefined {
+  const [left, right, links] = content.split(/\|\s*\/\s*\|/) || [];
+  let leftList = trim2Arr(left);
+  let rightList = trim2Arr(right);
+  let linkList = trim2Arr(links);
+  const ln = leftList.length;
+  // 处理左边的格式，完整格式：label | labelColor | message | green
+  if (ln < 2) {
+    // 必须要有 message 和 color
+    return;
+  } else if (ln === 2) {
+    // [message, color]
+    leftList = ['', '', ...leftList];
+  } else if (ln === 3) {
+    // [label, message, color]
+    leftList.splice(1, 0, '');
+  }
+
+  const [label, labelColor, message, color] = leftList;
+  const [logo, logoColor = ''] = rightList;
+  // message link 在前面，因为 label 不一定有，message 必须存在
+  const [messageLink, labelLink] = linkList;
+  let badge: OrgBadgeType | undefined;
+  if (message && color) {
+    badge = {
+      message,
+      color,
+      schemaVersion: 1,
+      messageLink,
+      label,
+      labelColor,
+      labelLink,
+      logo,
+      logoColor,
+    };
+    // 直接构建成badge url
+    badge.url = buildBadgeUrl(badge);
+  }
+
+  return badge;
+}
+
+function buildBadgeUrl(badge: OrgBadgeType) {
+  const url = 'https://img.shields.io/static';
+  const { schemaVersion, ...params } = badge;
+  const query = buildUrlParam(params as any);
+  return `${url}/v${schemaVersion}?${query}`;
 }
 
 export const normalTransforms = [

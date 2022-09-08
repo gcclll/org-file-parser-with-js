@@ -106,9 +106,33 @@ export interface OrgTextNode extends OrgBaseNode {
   type: OrgNodeTypes.TEXT;
 }
 
+export type OrgBadgeStyle =
+  | 'flat'
+  | 'plastic'
+  | 'flat-square'
+  | 'for-the-badge'
+  | 'social';
+// 包含属性查看 https://shields.io/endpoint
+// 支持的 icons: https://simpleicons.org/
+export interface OrgBadgeType {
+  message: string; // 右边的文字
+  color: string;
+  schemaVersion: number;
+  messageLink?: string;
+  label?: string; // 左边的文字
+  labelColor?: string;
+  labelLink?: string;
+  logo?: string; // 左边开头的图标
+  logoColor?: string;
+  logoWidth?: number;
+  style?: string;
+  url?: string;
+}
+
 export interface OrgColorfulTextNode extends OrgBaseNode {
   type: OrgNodeTypes.COLORFUL_TEXT;
   color: string;
+  badge?: OrgBadgeType;
 }
 
 export interface OrgTimestamp {
@@ -125,7 +149,7 @@ export interface OrgTimestampNode extends OrgBaseNode {
   timestamp: OrgTimestamp;
 }
 
-export type OrgScriptSign = '_' | '^'
+export type OrgScriptSign = '_' | '^';
 export interface OrgSubSupNode extends OrgBaseNode {
   type: OrgNodeTypes.SUB_SUP;
   sign: OrgScriptSign;
@@ -196,8 +220,6 @@ export interface OrgListNode extends OrgBaseNode {
   items: OrgListItem[];
   attrs?: Record<string, string>;
 }
-
-
 
 export enum InlineEmphasisSign {
   CODE_EQUAL = '=',

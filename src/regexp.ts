@@ -10,6 +10,7 @@ export const unorderListRE = /^(\s*)(-|\+|\s+\*)\s+(\[[-x ]\]\s+)?(.*)$/;
 export const orderListRE = /^(\s*)([\d\w]+)(?:\.|\))\s+(\[[-x ]\]\s+)?(.*)$/;
 export const extLinkRE = /\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/g;
 export const extLinkXRE = /^\[\[([^[\]]+)](?:\[([^[\]]+)])?\]/;
+export const pureLinkRE = /^\s*(https?|file):\/\/[^\s]+/
 export const innerLinkRE = /<<([^<>]+)>>/g;
 export const innerLinkXRE = /^<<([^<>]+)>>/;
 export const emphasisRE =

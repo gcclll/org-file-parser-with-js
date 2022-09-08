@@ -22,7 +22,13 @@ import {
 } from './ast';
 import * as re from './regexp';
 import { parseEmphasisNode } from './emphasis';
-import { matchTimestamp, findIndex, traverse, isString } from './utils';
+import {
+  matchTimestamp,
+  findIndex,
+  traverse,
+  isString,
+  genColorRegFn,
+} from './utils';
 import { transformColorText, normalTransforms } from './transform';
 
 export function baseParse(
@@ -121,30 +127,30 @@ function parseResult(
   list: string[],
   index: number
 ): OrgResultNode | undefined {
-
-  let start = 0, n = 0;
-  const values: string[] = []
+  let start = 0,
+    n = 0;
+  const values: string[] = [];
   for (let i = index; i < list.length; i++) {
-    const s = list[i]
+    const s = list[i];
     if (s && re.resultLineRE.test(s)) {
-      start = start === 0 ? i : start
-      n++
-      values.push(s)
+      start = start === 0 ? i : start;
+      n++;
+      values.push(s);
     } else {
-      break
+      break;
     }
   }
 
   if (start === 0 || n === 0) {
-    return
+    return;
   }
 
-  list.splice(start, n)
+  list.splice(start, n);
 
   return {
     type: OrgNodeTypes.RESULT,
     values,
-  }
+  };
 }
 
 function parseTable(
@@ -240,16 +246,17 @@ export function parseTextWithNode(
   }
   const s = node[key as keyof OrgTextNode];
 
-  const reParserMap: Array<[RegExp, (node: OrgTextNode) => OrgTextChildNode]> =
-    [
-      // parse state keywords(eg. TODO, DONE, CANCELLED)
-      [re.stateRE, parseStateKeywords],
-      // parse sub or sup text, 如：header_sub 或 header_{sub}
-      [re.subSupRE, parseSubSupText],
-      // parse colorful bare text, 如：red:red-text
-      [re.colorTextRE.bareGlobal, parseColorfulBareText],
-      [re.colorTextRE.bareBeginGlobal, parseColorfulBareText],
-    ];
+  const reParserMap: Array<
+    [RegExp | ((s: string) => boolean), (node: OrgTextNode) => OrgTextChildNode]
+  > = [
+    // parse state keywords(eg. TODO, DONE, CANCELLED)
+    [re.stateRE, parseStateKeywords],
+    // parse sub or sup text, 如：header_sub 或 header_{sub}
+    [re.subSupRE, parseSubSupText],
+    // parse colorful bare text, 如：red:red-text
+    [genColorRegFn(re.colorTextRE.bareGlobal), parseColorfulBareText],
+    [genColorRegFn(re.colorTextRE.bareBeginGlobal), parseColorfulBareText],
+  ];
 
   // 需要递归进行解析，因此需要保证每个函数都能被执行到
   if (all) {
@@ -263,7 +270,10 @@ export function parseTextWithNode(
   for (let i = 0; i < reParserMap.length; i++) {
     const [re, parser] = reParserMap[i];
 
-    if (typeof s === 'string' && re.test(s)) {
+    if (
+      typeof s === 'string' &&
+      (typeof re === 'function' ? re(s) : re.test(s))
+    ) {
       return parser(node);
     }
   }

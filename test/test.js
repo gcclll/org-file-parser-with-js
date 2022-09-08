@@ -122,7 +122,13 @@ text = `
 :ID:       a4647863-71e6-4764-88db-b80bfb963f69
 :END:
 
+<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com>
   text 1
+
+text1 red:text text2 <color:text> text3
+
+https://www.baidu.com
+
 #+list_attr: name=x-list;value=xxx
 1) list item 1
    text 11

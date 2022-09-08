@@ -72,6 +72,10 @@ LIVE DEMO: https://cheng92.com/demo/org
     
     * [x] Support emphasis text, `<red:text1 _text2_>`
     
+    * [x] Badge format
+    
+      Full badge format: `<badge:label | labelColor | message | color | / | logo | logoColor | / | messageLink | labelLink>`
+    
   * [x] Nested emphasis node
 
     `_underline before <red:colorfultext> after_`

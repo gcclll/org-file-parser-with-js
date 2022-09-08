@@ -71,6 +71,7 @@ export function parseEmphasisNode(
     type: OrgNodeTypes.TEXT,
     children: [],
   };
+
   root.children = parseChildren(context, []);
   root.children = root.children.filter((child) => {
     if (typeof child.content === 'string') {
@@ -92,6 +93,7 @@ function parseTimeStamp(context: OrgNestContext): OrgTimestampNode {
   };
 }
 
+// deprecated
 export function parseColorText(context: OrgNestContext): OrgColorfulTextNode {
   let s = context.source;
   const [text, color, value] = re.colorTextRE.bareBegin.exec(s) || [];
@@ -150,6 +152,37 @@ function parseStateKeyword(context: OrgNestContext): OrgStateNode {
   };
 }
 
+// deprecated
+export function parsePureLink(context: OrgNestContext): OrgLinkNode {
+  const s = context.source;
+  const [url] = re.pureLinkRE.exec(s) || [];
+  context.source = s.slice(url.length);
+
+  return {
+    type: OrgNodeTypes.LINK,
+    linkType: 'external',
+    url,
+    description: url,
+  };
+}
+
+// 解析 <badge:xx|yy...>
+// TODO 扩展到其它特殊的 color 文本
+export function parseColorBadge(context: OrgNestContext): OrgColorfulTextNode {
+  const s = context.source
+  const [text = '', value] = /^\s*<badge:([^>]+)>/.exec(s) || []
+  // console.log({ s, text, value }, 111)
+
+  context.source = s.slice(text.length)
+
+  return {
+    type: OrgNodeTypes.COLORFUL_TEXT,
+    color: 'badge',
+    indent: 0,
+    content: value,
+  }
+}
+
 function parseChildren(
   context: OrgNestContext,
   ancestors: OrgTextChildNode[]
@@ -178,16 +211,17 @@ function parseChildren(
         }
       } else if (s[0] === '<') {
         jumpOut = true;
-        if (s[1] === '<' && re.innerLinkXRE.test(s)) {
+        // console.log({ s })
+        /*if (/^badge:/.test(s.slice(1))) { // <badge:...>
+          node = parseColorBadge(context)
+        } else */if (s[1] === '<' && re.innerLinkXRE.test(s)) {
           node = parseInnerLink(context);
         } else if (re.timestampXRE.test(s)) {
           node = parseTimeStamp(context);
         } else {
           jumpOut = false;
         }
-      } // else if (hasElement(extraTags, s[0])) {
-
-      // }
+      }
 
       if (!jumpOut) {
         node = parseElement(context, ancestors);

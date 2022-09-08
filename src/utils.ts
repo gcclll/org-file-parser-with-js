@@ -2,8 +2,12 @@ import { OrgTimestamp } from './ast';
 
 const toString = Object.prototype.toString;
 export const assign = Object.assign;
-export const isString = (v: any): boolean => toString.call(v) === '[object String]';
+export const isString = (v: any): boolean =>
+  toString.call(v) === '[object String]';
+export const isRegExp = (v: any): boolean =>
+  toString.call(v) === '[object RegExp]';
 export const isArray = Array.isArray;
+export const hasOwn = Object.prototype.hasOwnProperty;
 
 export function matchTimestamp(timestamp: string): OrgTimestamp | string {
   const re =
@@ -53,4 +57,55 @@ export function traverse(
 
 export function hasElement<T>(arr: T[], ele: T): boolean {
   return arr.indexOf(ele) > -1;
+}
+
+export function buildUrlParam(o: Record<string, string>): string {
+  const params: string[] = [];
+
+  for (let prop in o) {
+    if (hasOwn.call(o, prop)) {
+      const value = o[prop];
+      if (value) {
+        params.push(`${prop}=${value}`);
+      }
+    }
+  }
+
+  return params.join('&');
+}
+
+export const nonColorNames: Array<RegExp | string> = [/^https?/];
+export function isNonColorNames(
+  s: string,
+  formats: Array<RegExp | string> = nonColorNames
+): boolean {
+  for (let i = 0; i < formats.length; i++) {
+    const strOrRe = formats[i];
+
+    if (isRegExp(strOrRe) && (strOrRe as RegExp).test(s)) {
+      return true;
+    }
+
+    if (isString(strOrRe) && s.indexOf(strOrRe as string) !== 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// 用来排除 color text 中特殊的文本，如：https://...
+export function genColorRegFn(
+  re: RegExp,
+  formats: Array<RegExp | string> = nonColorNames
+): (s: string) => boolean {
+  return (s: string) => {
+    s = s.trim();
+
+    if (!re.test(s)) {
+      return false;
+    }
+
+    return !isNonColorNames(s, formats);
+  };
 }
