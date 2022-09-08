@@ -2,7 +2,7 @@ import { OrgTimestamp } from './ast';
 
 const toString = Object.prototype.toString;
 export const assign = Object.assign;
-export const isString = (v: any) => toString.call(v) === '[object String]';
+export const isString = (v: any): boolean => toString.call(v) === '[object String]';
 export const isArray = Array.isArray;
 
 export function matchTimestamp(timestamp: string): OrgTimestamp | string {

@@ -179,4 +179,51 @@ export function transformBlockResult(
   }
 }
 
-export const normalTransforms = [transformList, transformBlockResult];
+// <badge:gccll|homepage|/|vue> 会被解析成两部分，前面是
+// gccll|home| 后面 / 会被解析成 EMPHASIS，这里将它当作文本合并到前者去
+export function transformColorBadge(
+  node: OrgValidNode,
+  _: OrgValidNode,
+  __: number
+): void {
+  if (node.type === OrgNodeTypes.COLORFUL_TEXT && node.color === 'badge') {
+    const children = node.children || [];
+    const first = children[0];
+    if (first && first.type === OrgNodeTypes.TEXT) {
+      if (first.children?.length === 1) {
+        // 直接当作纯文本，交给使用都去处理
+        delete first.children;
+      }
+
+      for (let i = 1; i < children.length; i++) {
+        const child = children[i];
+        if (child) {
+          if (child.type === OrgNodeTypes.EMPHASIS) {
+            // 处理 `/` 特殊字符
+            first.content += child.sign;
+            if (child.children) {
+              if (child.children.length > 0) {
+                child.children.forEach((c) => {
+                  if (isString(c.content)) {
+                    first.content += (c.content as string) || '';
+                  }
+                });
+              }
+            }
+          } else if (isString(child.content)){
+            first.content += child.content as string;
+          }
+        }
+      }
+
+      // 删除后面的 children
+      children.splice(1);
+    }
+  }
+}
+
+export const normalTransforms = [
+  transformList,
+  transformBlockResult,
+  transformColorBadge,
+];

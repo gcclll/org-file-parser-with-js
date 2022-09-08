@@ -2,6 +2,10 @@
 #+author: gcclll
 #+email: gccll.love@gmail.com
 
+* badge
+
+<badge:gccll|homepage|green|/|vue> text1
+
 * Nested Emphasis Node
 
 
