@@ -1,13 +1,19 @@
 const fs = require('fs');
-const { baseParse: parse, parseEmphasisNode: parse2, traverse } = require('../dist/');
+const {
+  baseParse: parse,
+  parseEmphasisNode: parse2,
+  traverse,
+  handleBadgeInterpo,
+  interpolations,
+} = require('../dist/');
 
-let text = `TODO <<inner link>> DONE _u1 <red:underline /italic/ c2> u2_ text1 red:bare-text text5 <2022-12-22 12:00> text2 [[desc:abbrev][link]] text3  title-xxx^{sup-text} title-yyy_{sub-text}`
-text = `i should red:text1  green:text between texts <gray:xxx yyy> .`
-text = `red:text`
+let text = `TODO <<inner link>> DONE _u1 <red:underline /italic/ c2> u2_ text1 red:bare-text text5 <2022-12-22 12:00> text2 [[desc:abbrev][link]] text3  title-xxx^{sup-text} title-yyy_{sub-text}`;
+text = `i should red:text1  green:text between texts <gray:xxx yyy> .`;
+text = `red:text`;
 // text = `<red:text>`
 // text = `title^{_sub_}`
-text = `in red:text other text`
-text = `text1 !!text2!! text3`
+text = `in red:text other text`;
+text = `text1 !!text2!! text3`;
 // text = `in <red:text> other text`
 text = `#+title: test
 #+author: gcclll
@@ -116,7 +122,7 @@ DEADLINE: <2022-07-06 Wed>
 :PROPERTIES:
 :STYLE: .test{color:red}
 :END:
-`
+`;
 text = `
 :PROPERTIES:
 :ID:       a4647863-71e6-4764-88db-b80bfb963f69
@@ -153,12 +159,20 @@ https://www.baidu.com
 #+RESULT:
 : "hello world!"
 : "hello emacs-lisp!"
-`
+`;
 
-const ast = parse(text)
+const ast = parse(text);
 // traverse(ast, (node) => {
 //   console.log(node)
 // })
-fs.writeFile('./test.json', JSON.stringify(ast, null, 2), err => {
-  if (err) console.log(err)
-})
+fs.writeFile('./test.json', JSON.stringify(ast, null, 2), (err) => {
+  if (err) console.log(err);
+});
+
+const list = [
+  `<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com> xxx <badge:gcclll|home|blue>`
+]
+
+handleBadgeInterpo(list)
+
+// console.log(interpolations, list)

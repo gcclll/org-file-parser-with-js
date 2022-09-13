@@ -30,6 +30,7 @@ export enum OrgNodeTypes {
   TABLE, // 表格
 
   RESULT, // `: hello world` 行文本
+  INTERPOLATION, // {name}
 }
 
 export interface OrgRootNode {
@@ -48,7 +49,8 @@ export type OrgTextChildNode =
   | OrgLinkNode
   | OrgStateNode
   | OrgSubSupNode
-  | OrgColorfulTextNode;
+  | OrgColorfulTextNode
+  | OrgInterpolationNode;
 
 export type OrgValidNode =
   | OrgPropertyNode
@@ -98,6 +100,11 @@ export interface OrgPairNode<T> extends OrgBaseNode {
 export interface OrgResultNode extends OrgBaseNode {
   type: OrgNodeTypes.RESULT;
   values: string[];
+}
+
+export interface OrgInterpolationNode extends OrgBaseNode {
+  type: OrgNodeTypes.INTERPOLATION;
+  key: string;
 }
 
 export interface OrgFootNode extends OrgPairNode<string> {}

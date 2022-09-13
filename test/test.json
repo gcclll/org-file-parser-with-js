@@ -3,50 +3,25 @@
   "children": [
     {
       "type": 1,
-      "content": "<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com>",
+      "content": "{badge0}",
       "indent": 0,
       "children": [
         {
           "type": 12,
-          "sign": "<",
-          "children": [
-            {
-              "type": 1,
-              "content": "GCCLL | Homepage | green | | gnu-emacs | tinder |/|   "
-            }
-          ],
-          "extra": false,
           "color": "badge",
+          "content": "<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com>",
           "badge": {
-            "message": "green",
-            "color": "gnu-emacs",
+            "message": "Homepage",
+            "color": "green",
             "schemaVersion": 1,
+            "messageLink": "https://www.baidu.com",
             "label": "GCCLL",
-            "labelColor": "Homepage",
-            "logoColor": "",
-            "url": "https://img.shields.io/static/v1?message=green&color=gnu-emacs&label=GCCLL&labelColor=Homepage"
+            "labelColor": "",
+            "labelLink": "https://blog.cheng92.com",
+            "logo": "gnu-emacs",
+            "logoColor": "tinder",
+            "url": "https://img.shields.io/static/v1?message=Homepage&color=green&messageLink=https://www.baidu.com&label=GCCLL&labelLink=https://blog.cheng92.com&logo=gnu-emacs&logoColor=tinder"
           }
-        },
-        {
-          "type": 12,
-          "content": "//www.baidu.com",
-          "indent": 0,
-          "children": [],
-          "color": "https"
-        },
-        {
-          "type": 1,
-          "content": "| https:"
-        },
-        {
-          "type": 5,
-          "sign": "/",
-          "children": [],
-          "extra": false
-        },
-        {
-          "type": 1,
-          "content": "blog.cheng92.com"
         }
       ]
     },

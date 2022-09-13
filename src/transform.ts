@@ -8,6 +8,7 @@ import {
 import { isString, assign, buildUrlParam } from './utils';
 import { colorTextRE } from './regexp';
 import { parseEmphasisNode } from './emphasis';
+import { getInterpo } from './interpolation';
 
 export function transformColorText(node: OrgEmphasisNode): void {
   if (node.type === OrgNodeTypes.EMPHASIS && node.sign === '<') {
@@ -180,6 +181,21 @@ export function transformBlockResult(
   }
 }
 
+export function transformInterpolations(
+  node: OrgValidNode,
+  parent: OrgValidNode,
+  index: number
+): void {
+  if (node.type === OrgNodeTypes.INTERPOLATION) {
+    const ast = getInterpo(node.key);
+
+    if (ast) {
+      // 替换插值成对应的 ast
+      parent.children?.splice(index, 1, ast);
+    }
+  }
+}
+
 // <badge:gccll|homepage|/|vue> 会被解析成两部分，前面是
 // gccll|home| 后面 / 会被解析成 EMPHASIS，这里将它当作文本合并到前者去
 export function transformColorBadge(
@@ -240,7 +256,7 @@ function trim2Arr(s: string, splitter: string = '|'): string[] {
         .filter(Boolean);
 }
 
-function buildBadgeJSON(content: string): OrgBadgeType | undefined {
+export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
   const [left, right, links] = content.split(/\|\s*\/\s*\|/) || [];
   let leftList = trim2Arr(left);
   let rightList = trim2Arr(right);
@@ -284,13 +300,19 @@ function buildBadgeJSON(content: string): OrgBadgeType | undefined {
 
 function buildBadgeUrl(badge: OrgBadgeType) {
   const url = 'https://img.shields.io/static';
-  const { schemaVersion, ...params } = badge;
+  const { schemaVersion, messageLink, labelLink, ...params } = badge;
   const query = buildUrlParam(params as any);
-  return `${url}/v${schemaVersion}?${query}`;
+  const leftLink = messageLink ? `&link=${messageLink}` : '';
+  const rightLink = labelLink ? `&link=${labelLink}` : '';
+  return `${url}/v${schemaVersion}?${query}` + leftLink + rightLink;
 }
 
 export const normalTransforms = [
   transformList,
   transformBlockResult,
-  transformColorBadge,
+  // transformColorBadge,
+  // 使用插值之后就不再需要上面的 transformColorBadge 了，
+  // 因为 <badge:...> 会在解析之前就被替换成插值，等所有的文本解析完成之后
+  // 使用这个 transform 直接去替换掉即可
+  transformInterpolations,
 ];

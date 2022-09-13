@@ -20,6 +20,7 @@ import {
   OrgLinkNode,
   OrgColorfulTextNode,
   OrgStateNode,
+  OrgInterpolationNode,
   OrgNodeTypes,
   OrgStates,
 } from './ast';
@@ -38,11 +39,21 @@ const tagMap: Record<string, string> = {
   '<': '>', // inner link, timestamp, ...
   '+': '+', // line through
   '/': '/', // italic
+  '{': '}',
   '[[': ']]', // external link
 };
 extraTagMap.forEach((tag: string) => (tagMap[tag] = tag));
 
-const endTokens: string[] = ['_', '>', '+', '<', '/', '[[', ...extraTagMap];
+const endTokens: string[] = [
+  '_',
+  '>',
+  '+',
+  '<',
+  '/',
+  '{',
+  '[[',
+  ...extraTagMap,
+];
 
 export function last<T>(xs: T[]): T | undefined {
   return xs[xs.length - 1];
@@ -169,18 +180,34 @@ export function parsePureLink(context: OrgNestContext): OrgLinkNode {
 // 解析 <badge:xx|yy...>
 // TODO 扩展到其它特殊的 color 文本
 export function parseColorBadge(context: OrgNestContext): OrgColorfulTextNode {
-  const s = context.source
-  const [text = '', value] = /^\s*<badge:([^>]+)>/.exec(s) || []
+  const s = context.source;
+  const [text = '', value] = /^\s*<badge:([^>]+)>/.exec(s) || [];
   // console.log({ s, text, value }, 111)
 
-  context.source = s.slice(text.length)
+  context.source = s.slice(text.length);
 
   return {
     type: OrgNodeTypes.COLORFUL_TEXT,
     color: 'badge',
     indent: 0,
     content: value,
+  };
+}
+
+function parseInterpolation(
+  context: OrgNestContext
+): OrgInterpolationNode | undefined {
+  const s = context.source;
+  const [match, key] = /\s*{(\w+)}/.exec(s) || [];
+  if (match) {
+    context.source = s.slice(match.length);
+    return {
+      type: OrgNodeTypes.INTERPOLATION,
+      key,
+    };
   }
+
+  return;
 }
 
 function parseChildren(
@@ -214,13 +241,17 @@ function parseChildren(
         // console.log({ s })
         /*if (/^badge:/.test(s.slice(1))) { // <badge:...>
           node = parseColorBadge(context)
-        } else */if (s[1] === '<' && re.innerLinkXRE.test(s)) {
+        } else */ if (s[1] === '<' && re.innerLinkXRE.test(s)) {
           node = parseInnerLink(context);
         } else if (re.timestampXRE.test(s)) {
           node = parseTimeStamp(context);
         } else {
           jumpOut = false;
         }
+      } else if (s[0] === '{') {
+        node = parseInterpolation(context);
+        jumpOut = !!node;
+        console.log(node, { jumpOut })
       }
 
       if (!jumpOut) {

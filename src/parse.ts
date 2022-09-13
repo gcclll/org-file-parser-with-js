@@ -30,6 +30,7 @@ import {
   genColorRegFn,
 } from './utils';
 import { transformColorText, normalTransforms } from './transform';
+import { handlers as interpoHandlers } from './interpolation'
 
 export function baseParse(
   source: string,
@@ -39,6 +40,9 @@ export function baseParse(
 
   // 按行分析，因为 file.org 文档中主要是按照行来区分文章内容的。
   const list = source.split(/\n+/);
+
+  // 在解析之前做一些特殊处理，比如：将 <badge:...> 替换成插值 `{badgeN}`
+  interpoHandlers.forEach((handler) => handler(list))
 
   let nodes: OrgValidNode[] = [];
 
