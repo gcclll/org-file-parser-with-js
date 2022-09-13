@@ -265,7 +265,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
   const ln = leftList.length;
   // 处理左边的格式，完整格式：label | labelColor | message | green
   if (ln < 2) {
-    throwError(OrgErrorCodes.ERROR_BADGE_LESS_ARGS)
+    throwError(OrgErrorCodes.ERROR_BADGE_LESS_ARGS);
     // 必须要有 message 和 color
     return;
   } else if (ln === 2) {
@@ -283,6 +283,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
   let badge: OrgBadgeType | undefined;
   if (message && color) {
     badge = {
+      type: OrgNodeTypes.BADGE,
       message,
       color,
       schemaVersion: 1,

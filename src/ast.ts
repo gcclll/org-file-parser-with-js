@@ -31,6 +31,7 @@ export enum OrgNodeTypes {
 
   RESULT, // `: hello world` 行文本
   INTERPOLATION, // {name}
+  BADGE, // <badge:label|message>
 }
 
 export interface OrgRootNode {
@@ -122,6 +123,7 @@ export type OrgBadgeStyle =
 // 包含属性查看 https://shields.io/endpoint
 // 支持的 icons: https://simpleicons.org/
 export interface OrgBadgeType {
+  type: OrgNodeTypes.BADGE,
   message: string; // 右边的文字
   color: string;
   schemaVersion: number;
