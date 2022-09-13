@@ -134,6 +134,7 @@ export interface OrgBadgeType {
   logoWidth?: number;
   style?: string;
   url?: string;
+  useObject?: boolean; // 如果有 label 或 message link 要放到 <object/> 中
 }
 
 export interface OrgColorfulTextNode extends OrgBaseNode {

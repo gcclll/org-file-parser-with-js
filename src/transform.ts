@@ -9,6 +9,7 @@ import { isString, assign, buildUrlParam } from './utils';
 import { colorTextRE } from './regexp';
 import { parseEmphasisNode } from './emphasis';
 import { getInterpo } from './interpolation';
+import { throwError, OrgErrorCodes } from './error';
 
 export function transformColorText(node: OrgEmphasisNode): void {
   if (node.type === OrgNodeTypes.EMPHASIS && node.sign === '<') {
@@ -264,6 +265,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
   const ln = leftList.length;
   // 处理左边的格式，完整格式：label | labelColor | message | green
   if (ln < 2) {
+    throwError(OrgErrorCodes.ERROR_BADGE_LESS_ARGS)
     // 必须要有 message 和 color
     return;
   } else if (ln === 2) {
@@ -290,6 +292,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
       labelLink,
       logo,
       logoColor,
+      useObject: !!(messageLink || labelLink),
     };
     // 直接构建成badge url
     badge.url = buildBadgeUrl(badge);

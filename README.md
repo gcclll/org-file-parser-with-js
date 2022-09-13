@@ -70,11 +70,7 @@ LIVE DEMO: https://cheng92.com/demo/org
     
     Without `<>`, only support simple syntax，if want to use complex colorful text, use  `<...>` instead.
     
-    * [x] Support emphasis text, `<red:text1 _text2_>`
-    
-    * [x] Badge format
-    
-      Full badge format: `<badge:label | labelColor | message | color | / | logo | logoColor | / | messageLink | labelLink>`
+    * [x] Support emphasis text, `<red:text1 _text2_>
     
   * [x] Nested emphasis node
 
@@ -89,6 +85,10 @@ LIVE DEMO: https://cheng92.com/demo/org
   * [x] Self-define Emphasis, `~~, ==, ++, __, //, $$`
 
     * [x] [extra]( https://emacsnotes.wordpress.com/2022/06/29/use-org-extra-emphasis-when-you-need-more-emphasis-markers-in-emacs-org-mode/) : `!!, !@, !%, !&, @!, @@, @%, @&, %!, %@, %%, %&, &!, &@, &%, &&`
+
+  * [x] Badge text `<badge:left|/|right>`
+
+    Full badge format: `<badge:label | labelColor | message | color | / | logo | logoColor | / | messageLink | labelLink>`
 
 * [x] Attribute, `#+title: org-file-parser-with-js`
 
