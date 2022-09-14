@@ -59,14 +59,17 @@ export function hasElement<T>(arr: T[], ele: T): boolean {
   return arr.indexOf(ele) > -1;
 }
 
-export function buildUrlParam(o: Record<string, string>): string {
+export function buildUrlParam(
+  o: Record<string, string>,
+  withSpace = false
+): string {
   const params: string[] = [];
 
   for (let prop in o) {
     if (hasOwn.call(o, prop)) {
       const value = o[prop];
-      if (value) {
-        params.push(`${prop}=${value}`);
+      if (value || withSpace) {
+        params.push(`${prop}=${value || ''}`);
       }
     }
   }

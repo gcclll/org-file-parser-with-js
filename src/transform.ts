@@ -305,7 +305,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
 function buildBadgeUrl(badge: OrgBadgeType) {
   const url = 'https://img.shields.io/static';
   const { schemaVersion, messageLink, labelLink, ...params } = badge;
-  const query = buildUrlParam(params as any);
+  const query = buildUrlParam(params as any, true);
   const leftLink = messageLink ? `&link=${messageLink}` : '';
   const rightLink = labelLink ? `&link=${labelLink}` : '';
   return `${url}/v${schemaVersion}?${query}` + leftLink + rightLink;
