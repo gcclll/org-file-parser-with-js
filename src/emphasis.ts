@@ -182,7 +182,6 @@ export function parsePureLink(context: OrgNestContext): OrgLinkNode {
 export function parseColorBadge(context: OrgNestContext): OrgColorfulTextNode {
   const s = context.source;
   const [text = '', value] = /^\s*<badge:([^>]+)>/.exec(s) || [];
-  // console.log({ s, text, value }, 111)
 
   context.source = s.slice(text.length);
 
@@ -217,6 +216,7 @@ function parseChildren(
   const nodes: OrgTextChildNode[] = [];
 
   while (!isEnd(context, ancestors)) {
+    const os = context.source;
     advanceBy(context); // trim start spaces
     const s = context.source;
     let node: OrgTextChildNode | undefined = undefined;
@@ -238,10 +238,7 @@ function parseChildren(
         }
       } else if (s[0] === '<') {
         jumpOut = true;
-        // console.log({ s })
-        /*if (/^badge:/.test(s.slice(1))) { // <badge:...>
-          node = parseColorBadge(context)
-        } else */ if (s[1] === '<' && re.innerLinkXRE.test(s)) {
+        if (s[1] === '<' && re.innerLinkXRE.test(s)) {
           node = parseInnerLink(context);
         } else if (re.timestampXRE.test(s)) {
           node = parseTimeStamp(context);
@@ -251,15 +248,24 @@ function parseChildren(
       } else if (s[0] === '{') {
         node = parseInterpolation(context);
         jumpOut = !!node;
-        console.log(node, { jumpOut })
       }
 
       if (!jumpOut) {
         node = parseElement(context, ancestors);
       }
-    } else if (isEndTag(s[0]) || isEndTag(ds)) {
-      context.source = context.source.slice(isEndTag(ds) ? ds.length : 1);
-      continue;
+    } else if (isEndTag(ds) || isEndTag(s[0])) {
+      // 如果是以空格开头的可能不是结束符号，可能是单独的符号做为文本输出
+      const single = !isEndTag(ds);
+      const sign = single ? s[0] : ds;
+      if (/^\s+/.test(os)) {
+        node = {
+          type: OrgNodeTypes.TEXT,
+          content: s.slice(0, sign.length),
+        };
+      } else {
+        context.source = context.source.slice(sign.length);
+        continue;
+      }
     }
 
     if (!node) {
@@ -331,6 +337,11 @@ function parseNestText(context: OrgNestContext): OrgTextNode {
     if (index !== -1 && endIndex > index) {
       endIndex = index;
     }
+  }
+
+  // 去掉尾部的空格
+  while (endIndex > 0 && s[endIndex] !== ' ') {
+    endIndex--;
   }
 
   const content = s.slice(0, endIndex);

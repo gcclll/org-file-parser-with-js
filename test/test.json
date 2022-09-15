@@ -3,277 +3,40 @@
   "children": [
     {
       "type": 1,
-      "content": "{badge0}",
+      "content": "message + message color: {badge25}",
       "indent": 0,
       "children": [
+        {
+          "type": 1,
+          "content": "message"
+        },
+        {
+          "type": 1,
+          "content": "+"
+        },
+        {
+          "type": 1,
+          "content": "message color:"
+        },
         {
           "type": 12,
           "color": "badge",
-          "content": "<badge:GCCLL | Homepage | green | / | gnu-emacs | tinder |/| https://www.baidu.com | https://blog.cheng92.com>",
+          "content": "<badge:gcclll | green>",
           "badge": {
-            "message": "Homepage",
+            "type": 16,
+            "message": "gcclll",
             "color": "green",
             "schemaVersion": 1,
-            "messageLink": "https://www.baidu.com",
-            "label": "GCCLL",
+            "label": "",
             "labelColor": "",
-            "labelLink": "https://blog.cheng92.com",
-            "logo": "gnu-emacs",
-            "logoColor": "tinder",
-            "url": "https://img.shields.io/static/v1?message=Homepage&color=green&messageLink=https://www.baidu.com&label=GCCLL&labelLink=https://blog.cheng92.com&logo=gnu-emacs&logoColor=tinder"
+            "logoColor": "",
+            "useObject": false,
+            "url": "https://img.shields.io/static/v1?type=16&message=gcclll&color=green&label=&labelColor=&logo=&logoColor=&useObject="
           }
         }
       ]
-    },
-    {
-      "type": 1,
-      "content": "text 1",
-      "indent": 2,
-      "children": [
-        {
-          "type": 1,
-          "content": "text 1   "
-        }
-      ]
-    },
-    {
-      "type": 1,
-      "content": "text1 red:text text2 <color:text> text3",
-      "indent": 0,
-      "children": [
-        {
-          "type": 1,
-          "content": "text1   "
-        },
-        {
-          "type": 12,
-          "content": "text",
-          "indent": 0,
-          "children": [],
-          "color": "red"
-        },
-        {
-          "type": 1,
-          "content": "text2 "
-        },
-        {
-          "type": 12,
-          "sign": "<",
-          "children": [
-            {
-              "type": 1,
-              "content": "text",
-              "children": [
-                {
-                  "type": 1,
-                  "content": "text   "
-                }
-              ]
-            }
-          ],
-          "extra": false,
-          "color": "color"
-        },
-        {
-          "type": 1,
-          "content": "text3   "
-        }
-      ]
-    },
-    {
-      "type": 1,
-      "content": "https://www.baidu.com",
-      "indent": 0,
-      "children": [
-        {
-          "type": 12,
-          "content": "//www.baidu.com",
-          "indent": 0,
-          "children": [],
-          "color": "https"
-        }
-      ]
-    },
-    {
-      "type": 6,
-      "name": "1",
-      "isOrder": true,
-      "items": [
-        {
-          "type": 7,
-          "content": {
-            "type": 1,
-            "content": "list item 1",
-            "indent": 0,
-            "children": [
-              {
-                "type": 1,
-                "content": "list item 1   "
-              }
-            ]
-          },
-          "children": [
-            {
-              "type": 1,
-              "content": "text 11",
-              "indent": 3,
-              "children": [
-                {
-                  "type": 1,
-                  "content": "text 11   "
-                }
-              ]
-            }
-          ],
-          "name": "1",
-          "state": "",
-          "indent": 0,
-          "isOrder": true
-        },
-        {
-          "type": 7,
-          "content": {
-            "type": 1,
-            "content": "list item 2",
-            "indent": 0,
-            "children": [
-              {
-                "type": 1,
-                "content": "list item 2   "
-              }
-            ]
-          },
-          "children": [
-            {
-              "type": 1,
-              "content": "text 22",
-              "indent": 4,
-              "children": [
-                {
-                  "type": 1,
-                  "content": "text 22   "
-                }
-              ]
-            },
-            {
-              "type": 1,
-              "content": "text 33",
-              "indent": 4,
-              "children": [
-                {
-                  "type": 1,
-                  "content": "text 33   "
-                }
-              ]
-            }
-          ],
-          "name": "2",
-          "state": "",
-          "indent": 0,
-          "isOrder": true
-        }
-      ],
-      "attrs": {
-        "name": "x-list",
-        "value": "xxx"
-      }
-    },
-    {
-      "type": 7,
-      "content": {
-        "type": 1,
-        "content": "list item 3",
-        "indent": 0,
-        "children": [
-          {
-            "type": 1,
-            "content": "list item 3   "
-          }
-        ]
-      },
-      "children": [],
-      "name": "1",
-      "state": "",
-      "indent": 0,
-      "isOrder": true
-    },
-    {
-      "type": 6,
-      "name": "2",
-      "isOrder": true,
-      "items": [
-        {
-          "type": 7,
-          "content": {
-            "type": 1,
-            "content": "list item 3",
-            "indent": 0,
-            "children": [
-              {
-                "type": 1,
-                "content": "list item 3   "
-              }
-            ]
-          },
-          "children": [],
-          "name": "2",
-          "state": "",
-          "indent": 0,
-          "isOrder": true
-        }
-      ]
-    },
-    {
-      "type": 3,
-      "title": {
-        "type": 1,
-        "content": "header",
-        "indent": 0,
-        "children": [
-          {
-            "type": 1,
-            "content": "header   "
-          }
-        ]
-      },
-      "indent": 0,
-      "level": 1,
-      "properties": [
-        {
-          "name": "TEST",
-          "value": "multiple property test",
-          "category": "PROPERTIES"
-        },
-        {
-          "name": "NAME",
-          "value": "header single property"
-        }
-      ],
-      "tags": []
-    },
-    {
-      "type": 4,
-      "indent": 0,
-      "name": "src",
-      "code": "(message \"hello emacs-lisp!!!\")",
-      "lang": "emacs-lisp",
-      "attributes": [],
-      "options": [],
-      "result": {
-        "type": 14,
-        "values": [
-          ": \"hello world!\"",
-          ": \"hello emacs-lisp!\""
-        ]
-      }
     }
   ],
-  "properties": [
-    {
-      "name": "ID",
-      "value": "a4647863-71e6-4764-88db-b80bfb963f69",
-      "category": "PROPERTIES"
-    }
-  ],
+  "properties": [],
   "footnotes": []
 }

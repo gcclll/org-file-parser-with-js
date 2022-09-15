@@ -161,6 +161,8 @@ https://www.baidu.com
 : "hello emacs-lisp!"
 `;
 
+text = `message + message color: <badge:gcclll | green>`
+
 const ast = parse(text);
 // traverse(ast, (node) => {
 //   console.log(node)
