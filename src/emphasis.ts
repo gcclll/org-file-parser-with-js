@@ -34,7 +34,7 @@ export const extraTagMap = extraTags.reduce((tags: string[], tag: string) => {
   }
   return tags;
 }, []);
-const tagMap: Record<string, string> = {
+export const tagMap: Record<string, string> = {
   _: '_', // underline
   '<': '>', // inner link, timestamp, ...
   '+': '+', // line through
@@ -197,7 +197,8 @@ function parseInterpolation(
   context: OrgNestContext
 ): OrgInterpolationNode | undefined {
   const s = context.source;
-  const [match, key] = /\s*{(\w+)}/.exec(s) || [];
+  // FIX: special tags prefix #60
+  const [match, key] = /\s*{([#\w]+)}/.exec(s) || [];
   if (match) {
     context.source = s.slice(match.length);
     return {
@@ -216,7 +217,6 @@ function parseChildren(
   const nodes: OrgTextChildNode[] = [];
 
   while (!isEnd(context, ancestors)) {
-    const os = context.source;
     advanceBy(context); // trim start spaces
     const s = context.source;
     let node: OrgTextChildNode | undefined = undefined;
@@ -253,19 +253,9 @@ function parseChildren(
       if (!jumpOut) {
         node = parseElement(context, ancestors);
       }
-    } else if (isEndTag(ds) || isEndTag(s[0])) {
-      // 如果是以空格开头的可能不是结束符号，可能是单独的符号做为文本输出
-      const single = !isEndTag(ds);
-      const sign = single ? s[0] : ds;
-      if (/^\s+/.test(os)) {
-        node = {
-          type: OrgNodeTypes.TEXT,
-          content: s.slice(0, sign.length),
-        };
-      } else {
-        context.source = context.source.slice(sign.length);
-        continue;
-      }
+    } else if (isEndTag(s[0]) || isEndTag(ds)) {
+      context.source = context.source.slice(isEndTag(ds) ? ds.length : 1);
+      continue;
     }
 
     if (!node) {
@@ -340,9 +330,9 @@ function parseNestText(context: OrgNestContext): OrgTextNode {
   }
 
   // 去掉尾部的空格
-  while (endIndex > 0 && s[endIndex] !== ' ') {
-    endIndex--;
-  }
+  // while (endIndex > 0 && s[endIndex] !== ' ') {
+  //   endIndex--;
+  // }
 
   const content = s.slice(0, endIndex);
   context.source = s.slice(endIndex);

@@ -112,3 +112,11 @@ export function genColorRegFn(
     return !isNonColorNames(s, formats);
   };
 }
+
+export function code2Str(code: number): string {
+  return String.fromCharCode(code)
+}
+
+export function str2Code(ch: string): number {
+  return ch.charCodeAt(0)
+}

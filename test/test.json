@@ -3,12 +3,12 @@
   "children": [
     {
       "type": 1,
-      "content": "message + message color: {badge25}",
+      "content": "message {#43} message color: {badge29}",
       "indent": 0,
       "children": [
         {
           "type": 1,
-          "content": "message"
+          "content": "message "
         },
         {
           "type": 1,
@@ -16,7 +16,7 @@
         },
         {
           "type": 1,
-          "content": "message color:"
+          "content": "message color: "
         },
         {
           "type": 12,
@@ -31,7 +31,7 @@
             "labelColor": "",
             "logoColor": "",
             "useObject": false,
-            "url": "https://img.shields.io/static/v1?type=16&message=gcclll&color=green&label=&labelColor=&logo=&logoColor=&useObject="
+            "url": "https://img.shields.io/static/v1?type=16&message=gcclll&color=green"
           }
         }
       ]
