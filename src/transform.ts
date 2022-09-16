@@ -189,7 +189,7 @@ export function transformInterpolations(
 ): void {
   if (node.type === OrgNodeTypes.INTERPOLATION) {
     const ast = getInterpo(node.key);
-    
+
     if (ast) {
       // 替换插值成对应的 ast
       parent.children?.splice(index, 1, ast);
@@ -305,7 +305,7 @@ export function buildBadgeJSON(content: string): OrgBadgeType | undefined {
 function buildBadgeUrl(badge: OrgBadgeType) {
   const url = 'https://img.shields.io/static';
   const { schemaVersion, messageLink, labelLink, ...params } = badge;
-  const query = buildUrlParam(params as any, );
+  const query = buildUrlParam(params as any, true);
   const leftLink = messageLink ? `&link=${messageLink}` : '';
   const rightLink = labelLink ? `&link=${labelLink}` : '';
   return `${url}/v${schemaVersion}?${query}` + leftLink + rightLink;
