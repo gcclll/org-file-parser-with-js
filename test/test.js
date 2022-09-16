@@ -163,6 +163,18 @@ https://www.baidu.com
 
 text = `message + message color: <badge:gcclll | green>`
 
+text = `* Table
+
+| name    | value |
+|---------+-------|
+| default | since |
+| 222     | 1111  |
+
+
+<badge:xx|yyy|blue>
+
+* blocks`
+
 const ast = parse(text);
 // traverse(ast, (node) => {
 //   console.log(node)

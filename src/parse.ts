@@ -199,7 +199,8 @@ function parseTable(
     }
   }
 
-  const rows = end - start;
+  // FIX: 多删除了一行
+  const rows = end - start - 1;
   list.splice(start, rows);
 
   return {
