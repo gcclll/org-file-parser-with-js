@@ -155,7 +155,7 @@ export interface OrgTimestamp {
   dein?: string; // [+-]\d[wdmy] -> week/day/month/year
   hour?: string;
   minute?: string;
-  seconds: string;
+  seconds?: string;
 }
 
 export interface OrgTimestampNode extends OrgBaseNode {

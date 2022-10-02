@@ -30,7 +30,7 @@ export function matchTimestamp(timestamp: string): OrgTimestamp | string {
   }
   result.date =`${year}-${month}-${day}`
   if (result.time) {
-    const [hour, mintue, seconds] = result.time
+    const [hour, minute, seconds] = result.time
     assign(result, { hour, minute, seconds })
   }
 

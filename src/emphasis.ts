@@ -9,7 +9,7 @@
  * @author Zhicheng Lee <gccll.love@gmail.com>
  * @license MIT
  */
-import { isArray, assign } from './utils';
+import { isArray } from './utils';
 import {
   OrgEmphasisNode,
   InlineEmphasisSign,
