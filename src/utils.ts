@@ -28,6 +28,11 @@ export function matchTimestamp(timestamp: string): OrgTimestamp | string {
   if (!year && !month && !day) {
     return timestamp.trim();
   }
+  result.date =`${year}-${month}-${day}`
+  if (result.time) {
+    const [hour, mintue, seconds] = result.time
+    assign(result, { hour, minute, seconds })
+  }
 
   return result;
 }

@@ -150,8 +150,12 @@ export interface OrgTimestamp {
   month: string;
   day: string;
   week?: string;
+  date?: string;
   time?: string;
   dein?: string; // [+-]\d[wdmy] -> week/day/month/year
+  hour?: string;
+  minute?: string;
+  seconds: string;
 }
 
 export interface OrgTimestampNode extends OrgBaseNode {
