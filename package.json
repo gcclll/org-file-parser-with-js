@@ -4,8 +4,8 @@
   "version": "0.1.55",
   "license": "MIT",
   "description": "A parser for Emacs Org mode files.",
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
+  "main": "./dist/org-file-parser-with-js.cjs.development.js",
+  "module": "./dist/org-file-parser-with-js.esm.js",
   "types": "./dist/parse.d.ts",
   "files": [
     "dist",
