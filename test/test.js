@@ -174,6 +174,9 @@ text = `* Table
 <badge:xx|yyy|blue>
 
 * blocks`
+text = `
+inactive date: [2022-10-03], [2022-03-03 08:22]
+active date: <2022-12-22>, <2022-01-01 10:00>`
 
 const ast = parse(text);
 // traverse(ast, (node) => {

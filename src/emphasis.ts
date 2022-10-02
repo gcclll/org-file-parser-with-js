@@ -231,10 +231,14 @@ function parseChildren(
       // 处理一些特殊的非嵌套文本
       let jumpOut = false;
       if (s[0] === '[') {
+        console.log({ s, x: re.timestampXRE.test(s) })
         if (s[1] === '[' && re.extLinkXRE.test(s)) {
           // external link
           node = parseExtLink(context);
           jumpOut = true;
+        } else if (re.timestampXRE.test(s)) {
+          node = parseTimeStamp(context)
+          jumpOut = true
         }
       } else if (s[0] === '<') {
         jumpOut = true;

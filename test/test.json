@@ -2,88 +2,76 @@
   "type": 0,
   "children": [
     {
-      "type": 3,
-      "title": {
-        "type": 1,
-        "content": "Table",
-        "indent": 0,
-        "children": [
-          {
-            "type": 1,
-            "content": "Table   "
-          }
-        ]
-      },
-      "indent": 0,
-      "level": 1,
-      "properties": [],
-      "tags": []
-    },
-    {
-      "type": 13,
-      "nodes": [
-        {
-          "0": "default",
-          "1": "since"
-        },
-        {
-          "0": "222",
-          "1": "1111"
-        }
-      ],
-      "columns": [
-        {
-          "label": "name",
-          "prop": "0"
-        },
-        {
-          "label": "value",
-          "prop": "1"
-        }
-      ],
-      "rows": 3,
-      "indent": 0
-    },
-    {
       "type": 1,
-      "content": "{badge0}",
+      "content": "inactive date: {inactiveTimestamp15}, {inactiveTimestamp29}",
       "indent": 0,
       "children": [
         {
-          "type": 12,
-          "color": "badge",
-          "content": "<badge:xx|yyy|blue>",
-          "badge": {
-            "type": 16,
-            "message": "yyy",
-            "color": "blue",
-            "schemaVersion": 1,
-            "label": "xx",
-            "labelColor": "",
-            "logoColor": "",
-            "useObject": false,
-            "url": "https://img.shields.io/static/v1?type=16&message=yyy&color=blue&label=xx&labelColor=&logo=&logoColor=&useObject="
+          "type": 1,
+          "content": "inactive date: "
+        },
+        {
+          "type": 8,
+          "timestamp": {
+            "year": "2022",
+            "month": "10",
+            "day": "03",
+            "date": "2022-10-03"
+          }
+        },
+        {
+          "type": 1,
+          "content": ", "
+        },
+        {
+          "type": 8,
+          "timestamp": {
+            "year": "2022",
+            "month": "03",
+            "day": "03",
+            "time": "08:22",
+            "date": "2022-03-03",
+            "hour": "08",
+            "minute": "22"
           }
         }
       ]
     },
     {
-      "type": 3,
-      "title": {
-        "type": 1,
-        "content": "blocks",
-        "indent": 0,
-        "children": [
-          {
-            "type": 1,
-            "content": "blocks   "
-          }
-        ]
-      },
+      "type": 1,
+      "content": "active date: <2022-12-22>, <2022-01-01 10:00>",
       "indent": 0,
-      "level": 1,
-      "properties": [],
-      "tags": []
+      "children": [
+        {
+          "type": 1,
+          "content": "active date: "
+        },
+        {
+          "timestamp": {
+            "year": "2022",
+            "month": "12",
+            "day": "22",
+            "date": "2022-12-22"
+          },
+          "type": 8
+        },
+        {
+          "type": 1,
+          "content": ", "
+        },
+        {
+          "timestamp": {
+            "year": "2022",
+            "month": "01",
+            "day": "01",
+            "time": "10:00",
+            "date": "2022-01-01",
+            "hour": "10",
+            "minute": "00"
+          },
+          "type": 8
+        }
+      ]
     }
   ],
   "properties": [],

@@ -1,9 +1,18 @@
-import { OrgColorfulTextNode, OrgTextNode, OrgNodeTypes } from './ast';
+import {
+  OrgColorfulTextNode,
+  OrgTextNode,
+  OrgTimestampNode,
+  OrgTimestamp,
+  OrgNodeTypes,
+} from './ast';
 import { tagMap } from './emphasis';
 import { buildBadgeJSON } from './transform';
-import { str2Code } from './utils';
+import { str2Code, matchTimestamp } from './utils';
 
-export type OrgInterpoValue = OrgColorfulTextNode | OrgTextNode;
+export type OrgInterpoValue =
+  | OrgColorfulTextNode
+  | OrgTextNode
+  | OrgTimestampNode;
 // 插值功能，将一些特殊的文本事先拆分出来，使用插值替换，在后面的 transform 阶段使用
 // 这个进行替换
 export const interpolations: Record<string, OrgInterpoValue> = {};
@@ -32,11 +41,11 @@ function replaceToken(token: string, source: string): string {
     if (!interpolations[name]) {
       interpolations[name] = {
         type: OrgNodeTypes.TEXT,
-        content: p1
+        content: p1,
       };
     }
 
-    return ` {${name}} `
+    return ` {${name}} `;
   });
 
   return source;
@@ -56,14 +65,14 @@ export function handleSpecialTags(list: string[]) {
     for (let j = 0; j < startTokens.length; j++) {
       const c = startTokens[j];
       if (c) s = replaceToken(c, s);
-      list[i] = s
+      list[i] = s;
     }
 
     // end tokens
     for (let k = 0; k < startTokens.length; k++) {
       const c = endTokens[k];
       if (c) s = replaceToken(c, s);
-      list[i] = s
+      list[i] = s;
     }
   }
 }
@@ -90,4 +99,28 @@ export function handleBadgeInterpo(list: string[]) {
   }
 }
 
-export const handlers = [handleSpecialTags, handleBadgeInterpo];
+export function handleInactiveDate(list: string[]) {
+  const re = /\[(\d{4}-\d{2}-\d{2}(?:[\w\s\-+:]+)?)\]/g;
+  for (let i = 0; i < list.length; i++) {
+    let s = list[i];
+    if (!s) continue;
+
+    s = s.replace(re, (_, p1, offset) => {
+      const name = `inactiveTimestamp${offset}`;
+      interpolations[name] = {
+        type: OrgNodeTypes.TIMESTAMP,
+        timestamp: matchTimestamp(p1) as OrgTimestamp,
+      };
+
+      return `{${name}}`;
+    });
+
+    list[i] = s
+  }
+}
+
+export const handlers = [
+  handleSpecialTags,
+  handleBadgeInterpo,
+  handleInactiveDate,
+];
