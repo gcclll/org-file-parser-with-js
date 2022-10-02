@@ -92,7 +92,11 @@ LIVE DEMO: https://cheng92.com/demo/org
 
 * [x] Attribute, `#+title: org-file-parser-with-js`
 
-* [x] [Date & Times](https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times)
+* [x] Timestamps
+
+  * [x] Inactive timestamp: `[yyyy-MM-dd Week hh:mm]`
+
+  * [x] Active timestamp: `<yyyy-MM-dd Week hh:mm>`
 
 * [x] [Images](https://orgmode.org/manual/Images.html)
 
